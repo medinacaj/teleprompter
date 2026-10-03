@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://medinacaj.github.io/dr.claudio/sitemap.xml
+Sitemap: https://medinacaj.github.io/teleprompter/sitemap.xml
