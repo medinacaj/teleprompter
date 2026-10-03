@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://medinacaj.github.io/dr.claudio/sitemap.xml
