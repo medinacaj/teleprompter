@@ -90,7 +90,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 @media (min-width:560px){.panel{border-radius:18px;padding-bottom:0}}
 .panel-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 18px;border-bottom:1px solid var(--line)}
 .panel-head h2{margin:0;font-size:1rem}
-.list{overflow-y:auto;padding:10px;display:grid;gap:8px}
+.list{overflow-y:auto;padding:10px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:6px 6px 6px 12px}
 .item .open{flex:1;min-width:0;padding:6px 2px;text-align:left;background:none;border:0;cursor:pointer}
 .item .name{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -102,6 +102,11 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .del[data-armed="1"]::after{content:"¿Borrar?"}
 .empty{margin:0;padding:26px 8px;text-align:center;color:var(--muted);font-size:.92rem}
 .note{margin:0;padding:10px 18px 14px;color:var(--faint);font-size:.78rem;border-top:1px solid var(--line)}
+.lib-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.lib-actions .btn{flex:1 1 0;min-width:0;min-height:44px;padding:0 10px;font-size:.9rem;background:var(--panel2)}
+.lib-msg{margin:0;padding:0 18px 10px;color:var(--amber);font-size:.8rem;min-height:0}
+.lib-msg:empty{display:none}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .ib{width:44px;height:44px;flex:none;display:grid;place-items:center;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--muted);cursor:pointer;padding:0}
 .ib:hover{color:var(--text);background:var(--panel2)}
 
@@ -189,6 +194,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
     <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
     <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/></symbol>
   </defs>
 </svg>
@@ -245,6 +252,12 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <button type="button" class="ib" id="libClose" aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button>
     </div>
     <div class="list" id="libList"></div>
+    <div class="lib-actions">
+      <button type="button" class="btn" id="btnExport" aria-label="Exportar todos los guiones (.json)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Exportar</button>
+      <button type="button" class="btn" id="btnImport"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>Importar</button>
+      <input type="file" id="fileIn" class="vh" accept=".json,.txt,application/json,text/plain" tabindex="-1" aria-hidden="true">
+    </div>
+    <p class="lib-msg" id="libMsg" role="status"></p>
     <p class="note" id="libNote"></p>
   </div>
 </div>
@@ -343,7 +356,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 
 const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
- 'lib','libList','libClose','libNote','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
+ 'lib','libList','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
@@ -515,12 +528,16 @@ function renderLibrary() {
       if (!armed) { del.dataset.armed = '1'; armed = setTimeout(() => { armed = 0; del.dataset.armed = ''; }, 3000); return; }
       clearTimeout(armed); deleteScript(it.id);
     });
-    row.append(open, del);
+    const dl = document.createElement('button'); dl.type = 'button'; dl.className = 'ib'; dl.setAttribute('aria-label', 'Descargar «' + it.name + '» como .txt');
+    dl.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>';
+    dl.addEventListener('click', () => exportOne(it.id));
+    row.append(open, dl, del);
     list.appendChild(row);
   }
+  el.btnExport.disabled = !S.scripts.length;
   el.libNote.textContent = Cloud.synced ? 'Sincronizados con tu cuenta.' : 'Guardados en este dispositivo.';
 }
-function openLib() { el.lib.hidden = false; renderLibrary(); el.libClose.focus(); syncCloud(); }
+function openLib() { el.lib.hidden = false; libMsg(''); renderLibrary(); el.libClose.focus(); syncCloud(); }
 function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
@@ -551,6 +568,99 @@ el.btnSave.addEventListener('click', saveScript);
 el.btnLib.addEventListener('click', openLib);
 el.libClose.addEventListener('click', closeLib);
 el.lib.addEventListener('click', e => { if (e.target === el.lib) closeLib(); });
+
+/* ================= Exportar e importar ================= */
+const MAX_IMPORT = 5 * 1024 * 1024, MAX_LEN = 200000;
+const Dl = { p: null };
+function downloadsNs() {
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') return Promise.resolve(null);
+  if (!Dl.p) Dl.p = (async () => { try { return await c.use('downloads'); } catch (e) { return null; } })();
+  return Dl.p;
+}
+let libMsgT = 0;
+function libMsg(m) { el.libMsg.textContent = m; clearTimeout(libMsgT); if (m) libMsgT = setTimeout(() => { el.libMsg.textContent = ''; }, 5000); }
+const safeName = n => (String(n).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'guion');
+async function offerFile(filename, data, mime) {
+  if (window.claude && typeof window.claude.use === 'function') {
+    const dl = await downloadsNs();
+    if (!dl) { libMsg('Las descargas no están disponibles en esta vista.'); return; }
+    try { await dl.save({ filename, data }); libMsg('Descargado ✓'); }
+    catch (e) {
+      const c = e && e.code;
+      libMsg(c === 'declined' ? 'Descarga cancelada.' : c === 'rate_limited' ? 'Espera un momento e inténtalo de nuevo.' : 'No se pudo descargar en esta vista.');
+    }
+    return;
+  }
+  try {     // fuera de claude.ai: descarga directa del navegador
+    const url = URL.createObjectURL(new Blob([data], { type: mime }));
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    libMsg('Descargado ✓');
+  } catch (e) { libMsg('No se pudo descargar.'); }
+}
+function exportAll() {
+  if (!S.scripts.length) return;
+  const d = new Date(), ymd = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const body = { app: 'prompter', version: 2, exportedAt: d.toISOString(), scripts: S.scripts.map(s => ({ name: s.name, content: s.content, savedAt: s.savedAt })) };
+  offerFile('prompter-guiones-' + ymd + '.json', JSON.stringify(body, null, 2), 'application/json');
+}
+function exportOne(id) {
+  const it = S.scripts.find(s => s.id === id); if (!it) return;
+  offerFile(safeName(it.name) + '.txt', it.content, 'text/plain');
+}
+/* Convierte el archivo en [{name, content, savedAt}]; lanza Error con mensaje para el usuario */
+function parseImport(fileName, raw) {
+  const txt = raw.replace(/^﻿/, '');
+  const isJson = /\.json$/i.test(fileName) || /^\s*[\[{]/.test(txt);
+  if (!isJson) {
+    if (!txt.trim()) throw new Error('El archivo está vacío.');
+    const base = fileName.replace(/\.[^.]*$/, '').trim();
+    return [{ name: base || firstLine(txt), content: txt.replace(/\r\n?/g, '\n'), savedAt: Date.now() }];
+  }
+  let data;
+  try { data = JSON.parse(txt); } catch (e) { throw new Error('El archivo .json no es válido.'); }
+  const arr = Array.isArray(data) ? data : (data && Array.isArray(data.scripts) ? data.scripts : null);
+  if (!arr) throw new Error('El archivo no contiene guiones de Prompter.');
+  return arr.slice(0, 500).filter(x => x && typeof x.content === 'string')
+    .map(x => ({ name: typeof x.name === 'string' ? x.name : '', content: x.content.replace(/\r\n?/g, '\n'), savedAt: Number(x.savedAt) || Date.now() }));
+}
+async function importFile(file) {
+  if (!file) return;
+  if (file.size > MAX_IMPORT) { libMsg('El archivo es demasiado grande (máx. 5 MB).'); return; }
+  let items;
+  try { items = parseImport(file.name || '', await file.text()); }
+  catch (e) { libMsg(e && e.message ? e.message : 'No se pudo leer el archivo.'); return; }
+  let added = 0, updated = 0, skipped = 0;
+  const touched = [];
+  for (const x of items) {
+    if (!x.content.trim() || x.content.length > MAX_LEN) { skipped++; continue; }
+    const name = (x.name.trim() || firstLine(x.content) || 'Guion sin título').slice(0, 80);
+    const it = S.scripts.find(s => s.name === name);
+    if (it) {
+      if (it.content === x.content || it.savedAt > x.savedAt) { skipped++; continue; }
+      it.content = x.content; it.savedAt = x.savedAt; it.pending = true; updated++; touched.push(it);
+    } else {
+      const n = { id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), name, content: x.content, savedAt: x.savedAt, pending: true };
+      S.scripts.push(n); added++; touched.push(n);
+    }
+  }
+  S.scripts.sort((a, b) => b.savedAt - a.savedAt);
+  persistLib(); renderSetup(); renderLibrary();
+  const parts = [];
+  if (added) parts.push(added + (added === 1 ? ' nuevo' : ' nuevos'));
+  if (updated) parts.push(updated + (updated === 1 ? ' actualizado' : ' actualizados'));
+  if (skipped) parts.push(skipped + (skipped === 1 ? ' omitido' : ' omitidos'));
+  libMsg(touched.length ? 'Importados: ' + parts.join(' · ') + '.' : 'No hay guiones nuevos que importar' + (skipped ? ' (' + parts.join(' · ') + ').' : '.'));
+  if (!touched.length) return;
+  if (Cloud.synced) { for (const it of touched) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } } }
+  else syncCloud();
+}
+el.btnExport.addEventListener('click', exportAll);
+el.btnImport.addEventListener('click', () => { el.fileIn.value = ''; el.fileIn.click(); });
+el.fileIn.addEventListener('change', () => { const f = el.fileIn.files && el.fileIn.files[0]; importFile(f); });
+downloadsNs();
 el.btnStart.addEventListener('click', openReader);
 
 /* ================= Lectura ================= */
