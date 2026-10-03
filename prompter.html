@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Prompter — Lector de guiones para grabar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía, modo espejo y guiones guardados.">
+<meta name="theme-color" content="#0a0a0b">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Prompter — Lector de guiones para grabar">
+<meta property="og:description" content="Pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía y modo espejo.">
+<meta name="twitter:card" content="summary">
+<style>
+:root{
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --serif:Georgia,'Noto Serif','Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  color-scheme:light;
+  --bg:#f5f2ea; --panel:#ffffff; --panel2:#efe9dc; --line:#ddd5c4;
+  --text:#1c1a16; --muted:#6a655a; --faint:#8a8476;
+  --amber:#b45309; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
+  --teal:#0f766e; --danger:#b91c1c;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
+    --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
+    --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
+    --teal:#2dd4bf; --danger:#f87171;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
+  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
+  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
+  --teal:#2dd4bf; --danger:#f87171;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:16px/1.5 var(--sans);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Setup ---------- */
+.wrap{max-width:720px;margin:0 auto;padding:22px 18px 48px}
+.tag{display:flex;align-items:center;gap:8px;font:600 .75rem/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--amber)}
+h1{margin:10px 0 4px;font-size:1.75rem;line-height:1.15;font-weight:700;letter-spacing:-.01em}
+.sub{margin:0 0 20px;color:var(--muted);font-size:.95rem}
+.field{display:block;width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:12px 14px;font:inherit;font-size:1rem}
+.field::placeholder{color:var(--faint)}
+.field:focus{outline:none;border-color:var(--amber)}
+textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px}
+.meta{margin:8px 2px 18px;color:var(--faint);font-size:.8rem;text-align:right;min-height:1.2em}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:2px 16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0}
+.row+.row{border-top:1px solid var(--line)}
+.lbl{display:block;font-size:.95rem}
+.hint{display:block;margin-top:2px;font-size:.78rem;line-height:1.35;color:var(--faint);max-width:34ch}
+.stepper{display:flex;align-items:center;gap:8px;flex:none}
+.step{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;cursor:pointer;padding:0}
+.step:active{transform:scale(.96)}
+.val{min-width:3.6ch;text-align:center;font:500 .98rem var(--mono);font-variant-numeric:tabular-nums}
+.switch{position:relative;flex:none;width:54px;height:32px;padding:0;border-radius:16px;border:1px solid var(--line);background:var(--panel2);cursor:pointer}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--muted);transition:transform .18s,background .18s}
+.switch[aria-checked="true"]{border-color:var(--teal)}
+.switch[aria-checked="true"]::after{transform:translateX(22px);background:var(--teal)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);font-size:.95rem;cursor:pointer}
+.btn:hover{border-color:var(--faint)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{flex:1 1 190px;background:var(--btn);border-color:transparent;color:var(--on-btn);font-weight:700}
+.btn.primary:hover:not(:disabled){background:var(--btn-h)}
+.flash{min-height:1.4em;margin:12px 2px 0;color:var(--amber);font-size:.85rem}
+.tips{margin:6px 2px 0;color:var(--faint);font-size:.8rem}
+
+/* ---------- Biblioteca ---------- */
+.modal{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55)}
+@media (min-width:560px){.modal{align-items:center;padding:20px}}
+.panel{width:100%;max-width:480px;max-height:82%;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:560px){.panel{border-radius:18px;padding-bottom:0}}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 18px;border-bottom:1px solid var(--line)}
+.panel-head h2{margin:0;font-size:1rem}
+.list{overflow-y:auto;padding:10px;display:grid;gap:8px}
+.item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:6px 6px 6px 12px}
+.item .open{flex:1;min-width:0;padding:6px 2px;text-align:left;background:none;border:0;cursor:pointer}
+.item .name{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .info{display:block;margin-top:1px;font-size:.78rem;color:var(--faint)}
+.del{min-width:44px;height:44px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:none;color:var(--faint);cursor:pointer;font-size:.8rem;font-weight:600}
+.del:hover{color:var(--danger)}
+.del[data-armed="1"]{color:var(--danger);background:var(--panel)}
+.del[data-armed="1"] .ic{display:none}
+.del[data-armed="1"]::after{content:"¿Borrar?"}
+.empty{margin:0;padding:26px 8px;text-align:center;color:var(--muted);font-size:.92rem}
+.note{margin:0;padding:10px 18px 14px;color:var(--faint);font-size:.78rem;border-top:1px solid var(--line)}
+.ib{width:44px;height:44px;flex:none;display:grid;place-items:center;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--muted);cursor:pointer;padding:0}
+.ib:hover{color:var(--text);background:var(--panel2)}
+
+/* ---------- Lectura (siempre oscura) ---------- */
+.reader{
+  position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+  color-scheme:dark;
+  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
+  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
+  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100; --teal:#2dd4bf;
+  --fs:44px; --lh:66px; --guide:200px;
+  background:var(--bg);color:var(--text);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-user-select:none;user-select:none;
+}
+.hud{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;padding:12px 16px 8px;font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.hud .time,.hud .ppm{font-variant-numeric:tabular-nums}
+.status{display:flex;align-items:center;gap:8px;letter-spacing:.14em;text-transform:uppercase}
+.tally{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.reader.playing .tally{background:var(--amber);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.3}}
+.bar{flex:none;height:4px;margin:0 16px;border-radius:4px;background:var(--panel);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--amber);transform-origin:left center;transform:scaleX(0)}
+.stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
+.scroller{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:pointer}
+.scroller::-webkit-scrollbar{display:none}
+.paper{max-width:780px;margin:0 auto;padding-left:22px;padding-right:22px}
+.text{font-family:var(--serif);font-size:var(--fs);line-height:1.5;color:var(--text)}
+.reader.mirror .text{transform:scaleX(-1)}
+.ln{margin:0;overflow-wrap:anywhere}
+.ln.gap{height:.9em}
+.w{opacity:.8;transition:opacity .25s,color .25s}
+.w.past{opacity:.3}
+.w.cur{opacity:1;color:#fffbe6}
+.band{position:absolute;left:0;right:0;top:calc(var(--guide) - var(--lh) / 2);height:var(--lh);pointer-events:none;z-index:2;background:rgba(251,191,36,.07);border-top:1px solid rgba(251,191,36,.16);border-bottom:1px solid rgba(251,191,36,.16)}
+.band::before,.band::after{content:"";position:absolute;top:50%;width:0;height:0;margin-top:-7px;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.band::before{left:0;border-left:10px solid var(--amber)}
+.band::after{right:0;border-right:10px solid var(--amber)}
+.fade{position:absolute;left:0;right:0;height:64px;pointer-events:none;z-index:3}
+.fade.top{top:0;background:linear-gradient(rgba(10,10,11,1),rgba(10,10,11,0))}
+.fade.bot{bottom:0;background:linear-gradient(rgba(10,10,11,0),rgba(10,10,11,1))}
+.count{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);cursor:pointer}
+.count svg{width:min(56vw,230px);height:auto;overflow:visible}
+.count .track{fill:none;stroke:var(--line);stroke-width:3}
+.count .ticks line{stroke:#3a3a40;stroke-width:2}
+.count .cross{stroke:#3a3a40;stroke-width:1}
+.count .ring{fill:none;stroke:var(--amber);stroke-width:4;stroke-dasharray:502.65;stroke-dashoffset:0}
+.count.run .ring{animation:sweep 3s linear forwards}
+@keyframes sweep{to{stroke-dashoffset:502.65}}
+.count .digit{font:600 66px var(--mono);fill:#fafaf9}
+.count .cap{margin:18px 0 0;font:500 .75rem var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.count .skip{margin:6px 0 0;font-size:.8rem;color:var(--faint)}
+.dock{flex:none;position:relative;padding:10px 12px 12px}
+.controls{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border:1px solid var(--line);border-radius:22px;background:var(--panel)}
+.play{width:62px;height:62px;border-radius:50%;background:var(--btn);color:var(--on-btn);border:0}
+.play:hover{background:var(--btn-h);color:var(--on-btn)}
+.play .ic{width:26px;height:26px}
+.pop{position:absolute;right:12px;bottom:calc(100% + 4px);width:min(310px,calc(100vw - 24px));z-index:6;padding:2px 16px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.pop .row{padding:11px 0}
+.pop .btn{width:100%;min-height:44px;margin:4px 0 12px;background:var(--panel2)}
+
+@media (max-width:360px){
+  .wrap{padding-left:14px;padding-right:14px}
+  .controls{gap:4px;padding:6px}
+  .hud{padding-left:12px;padding-right:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .reader.playing .tally{animation:none}
+  .w{transition:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20 7 4" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============ CONFIGURACIÓN ============ -->
+<main id="setup" class="wrap">
+  <header>
+    <div class="tag"><span class="dot"></span>Prompter</div>
+    <h1>Lector de guiones</h1>
+    <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
+  </header>
+
+  <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
+  <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
+  <p class="meta" id="meta"></p>
+
+  <section class="card" aria-label="Ajustes de lectura">
+    <div class="row">
+      <div><span class="lbl">Tamaño de letra</span><span class="hint">Tamaño del texto durante la lectura</span></div>
+      <div class="stepper">
+        <button type="button" class="step" id="fsDown" aria-label="Reducir tamaño de letra"><svg class="ic"><use href="#i-minus"/></svg></button>
+        <span class="val" id="fsVal">44</span>
+        <button type="button" class="step" id="fsUp" aria-label="Aumentar tamaño de letra"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </div>
+    </div>
+    <div class="row">
+      <div><span class="lbl">Velocidad</span><span class="hint">En palabras por minuto (ppm)</span></div>
+      <div class="stepper">
+        <button type="button" class="step" id="wpmDown" aria-label="Reducir velocidad"><svg class="ic"><use href="#i-minus"/></svg></button>
+        <span class="val" id="wpmVal">140</span>
+        <button type="button" class="step" id="wpmUp" aria-label="Aumentar velocidad"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </div>
+    </div>
+    <div class="row">
+      <div><span class="lbl" id="mirLbl">Modo espejo</span><span class="hint">Invierte el texto para teleprompters con vidrio. Si lees directo de la pantalla, déjalo apagado.</span></div>
+      <button type="button" class="switch" id="mirrorSw" role="switch" aria-checked="false" aria-labelledby="mirLbl"></button>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn" id="btnSave"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg>Guardar</button>
+    <button type="button" class="btn" id="btnLib"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span>Mis guiones<span id="libCount"></span></span></button>
+    <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
+  </div>
+  <p class="flash" id="flash" role="status"></p>
+  <p class="tips" id="tips"></p>
+</main>
+
+<!-- ============ BIBLIOTECA ============ -->
+<div id="lib" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="libTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="libTitle">Mis guiones</h2>
+      <button type="button" class="ib" id="libClose" aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="list" id="libList"></div>
+    <p class="note" id="libNote"></p>
+  </div>
+</div>
+
+<!-- ============ LECTURA ============ -->
+<section id="reader" class="reader" hidden aria-label="Lectura del guion">
+  <div class="hud">
+    <span class="time" id="rTime">0:00 / 0:00</span>
+    <span class="ppm" id="rPpm">140 ppm</span>
+    <span class="status"><i class="tally"></i><span id="rStatus">Listo</span></span>
+  </div>
+  <div class="bar"><i id="rFill"></i></div>
+
+  <div class="stage" id="stage">
+    <div class="scroller" id="scroller"><div class="paper" id="paper"><div class="text" id="rText"></div></div></div>
+    <div class="band" aria-hidden="true"></div>
+    <div class="fade top" aria-hidden="true"></div>
+    <div class="fade bot" aria-hidden="true"></div>
+    <div class="count" id="count" hidden>
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="track" cx="100" cy="100" r="80"/>
+        <g class="ticks" id="ticks"></g>
+        <line class="cross" x1="100" y1="20" x2="100" y2="180"/>
+        <line class="cross" x1="20" y1="100" x2="180" y2="100"/>
+        <circle class="ring" cx="100" cy="100" r="80" transform="rotate(-90 100 100)"/>
+        <text class="digit" id="digit" x="100" y="100" text-anchor="middle" dy=".35em">3</text>
+      </svg>
+      <p class="cap">Preparando</p>
+      <p class="skip">Toca para empezar ya</p>
+    </div>
+  </div>
+
+  <div class="dock" id="dock">
+    <div class="pop" id="pop" hidden>
+      <div class="row">
+        <span class="lbl">Tamaño de letra</span>
+        <div class="stepper">
+          <button type="button" class="step" id="popFsDown" aria-label="Reducir tamaño de letra"><svg class="ic"><use href="#i-minus"/></svg></button>
+          <span class="val" id="popFsVal">44</span>
+          <button type="button" class="step" id="popFsUp" aria-label="Aumentar tamaño de letra"><svg class="ic"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="lbl" id="popMirLbl">Modo espejo</span>
+        <button type="button" class="switch" id="popMirror" role="switch" aria-checked="false" aria-labelledby="popMirLbl"></button>
+      </div>
+      <div class="row" style="padding-bottom:0;border-top:1px solid var(--line)">
+        <button type="button" class="btn" id="btnRestart"><svg class="ic" aria-hidden="true"><use href="#i-replay"/></svg>Reiniciar lectura</button>
+      </div>
+    </div>
+    <div class="controls">
+      <button type="button" class="ib" id="btnExit" aria-label="Salir de la lectura"><svg class="ic"><use href="#i-back"/></svg></button>
+      <button type="button" class="ib" id="btnSlow" aria-label="Más lento"><svg class="ic"><use href="#i-minus"/></svg></button>
+      <button type="button" class="ib play" id="btnPlay" aria-label="Reproducir"><svg class="ic"><use id="icPlay" href="#i-play"/></svg></button>
+      <button type="button" class="ib" id="btnFast" aria-label="Más rápido"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <button type="button" class="ib" id="btnMore" aria-label="Más ajustes" aria-expanded="false" aria-controls="pop"><svg class="ic"><use href="#i-sliders"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+'use strict';
+
+/* Fuente mono para las lecturas numéricas (IBM Plex Mono); si no carga, se usa la del sistema */
+try { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap'; document.head.appendChild(l); } catch (e) { /* sin fuente web */ }
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* Constantes */
+const FS = [24, 96, 4];          // tamaño de letra: mín, máx, paso
+const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
+const LH = 1.5;                  // interlineado del texto
+const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
+const MIN_DUR = 4;               // duración mínima de una lectura (s)
+const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft';
+
+/* Almacenamiento local (con try/catch: puede estar bloqueado) */
+const ls = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+
+/* Estado */
+const S = {
+  title: '', text: '', words: 0,
+  prefs: { fs: 44, wpm: 140, mirror: false },
+  scripts: [], dels: [],
+  view: 'setup',
+  playing: false, finished: false, counting: false,
+  p: 0,            // progreso 0..1 de la lectura
+  elapsed: 0       // cronómetro real (s), solo avanza leyendo
+};
+const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '' };
+const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
+
+const el = {};
+['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
+ 'lib','libList','libClose','libNote','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
+ 'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
+ 'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+
+/* Utilidades */
+const countWords = t => (t.match(/\S+/g) || []).length;
+const fmt = s => {
+  s = Math.max(0, Math.round(s));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0') : m + ':' + String(x).padStart(2, '0');
+};
+const duration = () => Math.max(MIN_DUR, S.words / S.prefs.wpm * 60);
+const maxScroll = () => Math.max(0, el.scroller.scrollHeight - el.scroller.clientHeight);
+const fmtDate = ms => { try { return new Date(ms).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
+const firstLine = t => (t.trim().split('\n')[0] || '').trim().slice(0, 60);
+let flashT = 0;
+function flash(msg) { el.flash.textContent = msg; clearTimeout(flashT); flashT = setTimeout(() => { el.flash.textContent = ''; }, 2400); }
+
+/* Pulsar y mantener (repite al dejar presionado) */
+function press(btn, fn) {
+  let t = 0, iv = 0;
+  const stop = () => { clearTimeout(t); clearInterval(iv); t = iv = 0; };
+  btn.addEventListener('pointerdown', e => { if (e.button > 0) return; fn(); t = setTimeout(() => { iv = setInterval(fn, 90); }, 420); });
+  ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(ev => btn.addEventListener(ev, stop));
+  btn.addEventListener('click', e => { if (e.detail === 0) fn(); });
+}
+
+/* ================= Preferencias, biblioteca y borrador ================= */
+(function load() {
+  const p = ls.get(K_PREFS);
+  if (p) {
+    if (typeof p.fs === 'number') S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
+    if (typeof p.wpm === 'number') S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
+    S.prefs.mirror = !!p.mirror;
+  }
+  const d = ls.get(K_LIB);
+  if (d && Array.isArray(d.scripts)) {
+    S.scripts = d.scripts.filter(x => x && typeof x.id === 'string' && typeof x.content === 'string')
+      .map(x => ({ id: x.id, name: String(x.name || 'Guion'), content: x.content, savedAt: Number(x.savedAt) || 0, pending: !!x.pending }));
+  }
+  if (d && Array.isArray(d.dels)) S.dels = d.dels.filter(x => typeof x === 'string').slice(0, 200);
+  const dr = ls.get(K_DRAFT);
+  if (dr && typeof dr.x === 'string') { S.text = dr.x; S.title = typeof dr.t === 'string' ? dr.t : ''; }
+  S.words = countWords(S.text);
+})();
+
+let prefT = 0, draftT = 0;
+function savePrefs() { clearTimeout(prefT); prefT = setTimeout(flushPrefs, 250); }
+function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
+function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => ls.set(K_DRAFT, { t: S.title, x: S.text }), 400); }
+function persistLib() { ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
+
+/* ================= Configuración (pantalla inicial) ================= */
+function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
+function renderSetup() {
+  const w = S.words, wpm = S.prefs.wpm;
+  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' : 'Pega o escribe tu guion para empezar.';
+  el.fsVal.textContent = S.prefs.fs;
+  el.popFsVal.textContent = S.prefs.fs;
+  el.wpmVal.textContent = wpm;
+  setSwitch(el.mirrorSw, S.prefs.mirror);
+  setSwitch(el.popMirror, S.prefs.mirror);
+  el.reader.classList.toggle('mirror', S.prefs.mirror);
+  const has = !!S.text.trim();
+  el.btnSave.disabled = !has;
+  el.btnStart.disabled = !has;
+  el.libCount.textContent = S.scripts.length ? ' (' + S.scripts.length + ')' : '';
+  el.rPpm.textContent = wpm + ' ppm';
+}
+function setFs(v) {
+  S.prefs.fs = clamp(Math.round(v / FS[2]) * FS[2], FS[0], FS[1]);
+  savePrefs(); renderSetup();
+  if (S.view === 'reader') layout();
+}
+function setWpm(v) {
+  S.prefs.wpm = clamp(Math.round(v / WPM[2]) * WPM[2], WPM[0], WPM[1]);
+  savePrefs(); renderSetup();
+  if (S.view === 'reader') updateHud();
+}
+function setMirror(on) { S.prefs.mirror = !!on; savePrefs(); renderSetup(); }
+
+el.title.value = S.title;
+el.text.value = S.text;
+el.title.addEventListener('input', () => { S.title = el.title.value; saveDraft(); });
+el.text.addEventListener('input', () => { S.text = el.text.value; S.words = countWords(S.text); renderSetup(); saveDraft(); });
+press(el.fsDown, () => setFs(S.prefs.fs - FS[2]));
+press(el.fsUp, () => setFs(S.prefs.fs + FS[2]));
+press(el.wpmDown, () => setWpm(S.prefs.wpm - WPM[2]));
+press(el.wpmUp, () => setWpm(S.prefs.wpm + WPM[2]));
+el.mirrorSw.addEventListener('click', () => setMirror(!S.prefs.mirror));
+el.popMirror.addEventListener('click', () => setMirror(!S.prefs.mirror));
+el.tips.textContent = matchMedia('(pointer:fine)').matches
+  ? 'Durante la lectura: toca el texto o pulsa Espacio para pausar · ↑ ↓ cambian la velocidad · Esc sale.'
+  : 'Durante la lectura: toca el texto para pausar o reanudar.';
+
+/* ================= Biblioteca de guiones ================= */
+async function permState() {
+  try {
+    const c = window.claude;
+    if (!c || typeof c.use !== 'function') return 'unavailable';
+    const p = await c.use('permissions');
+    return p ? await p.state('db') : 'prompt';
+  } catch (e) { return 'unavailable'; }
+}
+function cloud() {
+  if (Cloud.p) return Cloud.p;
+  Cloud.p = (async () => {
+    try {
+      const c = window.claude;
+      if (!c || typeof c.use !== 'function') { Cloud.avail = false; return false; }
+      const [db, user] = await Promise.all([c.use('db'), c.use('user')]);
+      if (!db || !user) { Cloud.avail = false; return false; }
+      const uid = await user.id();
+      if (!uid) { Cloud.avail = false; return false; }
+      Cloud.coll = db.collection('data/users/' + uid);
+      return true;
+    } catch (e) { Cloud.avail = false; return false; }
+  })();
+  return Cloud.p;
+}
+async function pushItem(it) {
+  await Cloud.coll.doc(it.id).set({ name: it.name, content: it.content, savedAt: it.savedAt });
+  it.pending = false; persistLib();
+}
+async function syncCloud() {
+  if (Cloud.syncing || Cloud.avail === false) return;
+  Cloud.syncing = true;
+  try {
+    if (!(await cloud())) return;
+    const snap = await Cloud.coll.get();
+    const remote = new Map();
+    snap.docs.forEach(d => {
+      const x = d.data();
+      if (x && typeof x.content === 'string') remote.set(d.id, { id: d.id, name: String(x.name || 'Guion'), content: x.content, savedAt: Number(x.savedAt) || 0, pending: false });
+    });
+    const left = [];
+    for (const id of S.dels) {
+      try { await Cloud.coll.doc(id).delete(); remote.delete(id); } catch (e) { left.push(id); }
+    }
+    S.dels = left;
+    for (const it of S.scripts.filter(s => s.pending)) {
+      const r = remote.get(it.id);
+      if (r && r.savedAt > it.savedAt) continue;           // en la nube hay una versión más nueva
+      await Cloud.coll.doc(it.id).set({ name: it.name, content: it.content, savedAt: it.savedAt });
+      remote.set(it.id, { id: it.id, name: it.name, content: it.content, savedAt: it.savedAt, pending: false });
+    }
+    S.scripts = Array.from(remote.values()).sort((a, b) => b.savedAt - a.savedAt);
+    Cloud.synced = true;
+    persistLib(); renderSetup(); renderLibrary();
+  } catch (e) { /* se queda en local */ }
+  finally { Cloud.syncing = false; renderLibrary(); }
+}
+function renderLibrary() {
+  const list = el.libList;
+  list.textContent = '';
+  if (!S.scripts.length) {
+    const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'Aún no tienes guiones guardados.'; list.appendChild(p);
+  }
+  for (const it of S.scripts) {
+    const row = document.createElement('div'); row.className = 'item';
+    const open = document.createElement('button'); open.type = 'button'; open.className = 'open';
+    const n = document.createElement('span'); n.className = 'name'; n.textContent = it.name;
+    const i = document.createElement('span'); i.className = 'info'; i.textContent = fmtDate(it.savedAt) + ' · ' + countWords(it.content) + ' palabras';
+    open.append(n, i);
+    open.addEventListener('click', () => loadScript(it.id));
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.setAttribute('aria-label', 'Eliminar guion');
+    del.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>';
+    let armed = 0;
+    del.addEventListener('click', () => {
+      if (!armed) { del.dataset.armed = '1'; armed = setTimeout(() => { armed = 0; del.dataset.armed = ''; }, 3000); return; }
+      clearTimeout(armed); deleteScript(it.id);
+    });
+    row.append(open, del);
+    list.appendChild(row);
+  }
+  el.libNote.textContent = Cloud.synced ? 'Sincronizados con tu cuenta.' : 'Guardados en este dispositivo.';
+}
+function openLib() { el.lib.hidden = false; renderLibrary(); el.libClose.focus(); syncCloud(); }
+function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
+function loadScript(id) {
+  const it = S.scripts.find(s => s.id === id); if (!it) return;
+  S.title = it.name; S.text = it.content; S.words = countWords(S.text);
+  el.title.value = S.title; el.text.value = S.text;
+  saveDraft(); renderSetup(); closeLib(); flash('Guion cargado');
+}
+async function saveScript() {
+  const text = S.text.trim(); if (!text) return;
+  if (S.text.length > 200000) { flash('El guion es demasiado largo para guardarlo.'); return; }
+  const name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
+  const now = Date.now();
+  let it = S.scripts.find(s => s.name === name);
+  if (it) { it.content = S.text; it.savedAt = now; it.pending = true; }
+  else { it = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: S.text, savedAt: now, pending: true }; S.scripts.push(it); }
+  S.scripts.sort((a, b) => b.savedAt - a.savedAt);
+  persistLib(); renderSetup(); flash('Guardado ✓');
+  if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
+  else syncCloud();
+}
+async function deleteScript(id) {
+  S.scripts = S.scripts.filter(s => s.id !== id);
+  persistLib(); renderSetup(); renderLibrary();
+  if (Cloud.synced) { try { await Cloud.coll.doc(id).delete(); return; } catch (e) { /* se reintenta luego */ } }
+  if (Cloud.avail !== false && !S.dels.includes(id)) { S.dels.push(id); persistLib(); }
+}
+el.btnSave.addEventListener('click', saveScript);
+el.btnLib.addEventListener('click', openLib);
+el.libClose.addEventListener('click', closeLib);
+el.lib.addEventListener('click', e => { if (e.target === el.lib) closeLib(); });
+el.btnStart.addEventListener('click', openReader);
+
+/* ================= Lectura ================= */
+(function ticks() {
+  const ns = 'http://www.w3.org/2000/svg';
+  for (let i = 0; i < 12; i++) {
+    const l = document.createElementNS(ns, 'line');
+    l.setAttribute('x1', '100'); l.setAttribute('y1', '22'); l.setAttribute('x2', '100'); l.setAttribute('y2', '30');
+    l.setAttribute('transform', 'rotate(' + (i * 30) + ' 100 100)');
+    el.ticks.appendChild(l);
+  }
+})();
+
+function buildText() {
+  const frag = document.createDocumentFragment();
+  let prevGap = true;
+  for (const row of S.text.replace(/\r\n?/g, '\n').trim().split('\n')) {
+    const words = row.trim().split(/\s+/).filter(Boolean);
+    const p = document.createElement('p');
+    if (!words.length) {
+      if (prevGap) continue;           // colapsa líneas en blanco seguidas
+      p.className = 'ln gap'; prevGap = true; frag.appendChild(p); continue;
+    }
+    prevGap = false; p.className = 'ln';
+    words.forEach((w, i) => {
+      const s = document.createElement('span'); s.className = 'w'; s.textContent = w; p.appendChild(s);
+      if (i < words.length - 1) p.appendChild(document.createTextNode(' '));
+    });
+    frag.appendChild(p);
+  }
+  el.rText.textContent = '';
+  el.rText.appendChild(frag);
+  R.spans = Array.from(el.rText.querySelectorAll('.w'));
+}
+
+function measureLines() {
+  const sRect = el.scroller.getBoundingClientRect();
+  const st = el.scroller.scrollTop;
+  const tol = Math.max(4, S.prefs.fs * 0.4);
+  const lines = []; let cur = null;
+  for (const sp of R.spans) {
+    const r = sp.getBoundingClientRect();
+    const top = r.top - sRect.top + st, bottom = r.bottom - sRect.top + st;
+    if (cur && Math.abs(top - cur.top) < tol) { cur.spans.push(sp); cur.bottom = Math.max(cur.bottom, bottom); }
+    else { cur = { top, bottom, spans: [sp], boxBottom: 0 }; lines.push(cur); }
+  }
+  for (const L of lines) L.boxBottom = (L.top + L.bottom) / 2 + R.lineH / 2;
+  R.lines = lines; R.active = -1;
+  for (const sp of R.spans) sp.classList.remove('past', 'cur');
+}
+
+function layout() {
+  const H = el.scroller.clientHeight;
+  if (!H) return;
+  const fs = S.prefs.fs;
+  R.lineH = fs * LH; R.guide = Math.round(H * GUIDE);
+  const st = el.reader.style;
+  st.setProperty('--fs', fs + 'px'); st.setProperty('--lh', R.lineH + 'px'); st.setProperty('--guide', R.guide + 'px');
+  el.paper.style.paddingTop = R.guide + 'px';
+  el.paper.style.paddingBottom = Math.max(0, H - R.guide) + 'px';
+  measureLines();
+  const v = S.p * maxScroll();
+  el.scroller.scrollTop = v; R.lastSet = v;
+  updateActive(v, true);
+}
+
+/* Resalta la línea que cruza la marca guía y atenúa lo ya leído */
+function updateActive(pos, force) {
+  const L = R.lines; if (!L.length) return;
+  const y = pos + R.guide;
+  let lo = 0, hi = L.length - 1, idx = L.length - 1;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (L[mid].boxBottom > y) { idx = mid; hi = mid - 1; } else lo = mid + 1; }
+  if (!force && idx === R.active) return;
+  const from = R.active < 0 ? 0 : Math.min(idx, R.active);
+  const to = R.active < 0 ? L.length - 1 : Math.max(idx, R.active);
+  for (let i = from; i <= to; i++) {
+    const past = i < idx, cur = i === idx;
+    for (const sp of L[i].spans) { sp.classList.toggle('past', past); sp.classList.toggle('cur', cur); }
+  }
+  R.active = idx;
+}
+
+function updateHud() {
+  const total = S.elapsed + (1 - S.p) * duration();
+  const a = fmt(Math.floor(S.elapsed)), b = fmt(total);
+  if (a !== R.tA || b !== R.tB) { el.rTime.textContent = a + ' / ' + b; R.tA = a; R.tB = b; }
+  el.rFill.style.transform = 'scaleX(' + S.p.toFixed(4) + ')';
+  el.rPpm.textContent = S.prefs.wpm + ' ppm';
+}
+function updateStatus() {
+  let t = 'Listo';
+  if (S.counting) t = 'Cuenta'; else if (S.finished) t = 'Fin'; else if (S.playing) t = 'Leyendo'; else if (S.p > 0 || S.elapsed > 0) t = 'Pausado';
+  el.rStatus.textContent = t;
+  el.icPlay.setAttribute('href', S.playing ? '#i-pause' : (S.finished ? '#i-replay' : '#i-play'));
+  el.btnPlay.setAttribute('aria-label', S.counting ? 'Empezar ya' : (S.playing ? 'Pausar' : (S.finished ? 'Repetir' : 'Reproducir')));
+  el.reader.classList.toggle('playing', S.playing);
+}
+
+function frame(ts) {
+  R.raf = 0;
+  if (!S.playing) return;
+  if (R.last == null) R.last = ts;
+  let dt = (ts - R.last) / 1000; R.last = ts;
+  if (dt < 0) dt = 0; if (dt > 0.1) dt = 0.1;
+  const max = maxScroll();
+  const st = el.scroller.scrollTop;
+  if (max > 2 && Math.abs(st - R.lastSet) > 2) S.p = clamp(st / max, 0, 1);   // el usuario movió el texto
+  S.p = Math.min(1, S.p + dt / duration());
+  S.elapsed += dt;
+  const pos = S.p * max;
+  el.scroller.scrollTop = pos; R.lastSet = pos;
+  updateActive(pos);
+  updateHud();
+  if (S.p >= 1) { finish(); return; }
+  R.raf = requestAnimationFrame(frame);
+}
+function play() {
+  if (S.counting) return;
+  if (S.finished) { restart(); return; }
+  S.playing = true; R.last = null; updateStatus();
+  if (!R.raf) R.raf = requestAnimationFrame(frame);
+}
+function pause() {
+  S.playing = false; R.last = null;
+  if (R.raf) { cancelAnimationFrame(R.raf); R.raf = 0; }
+  updateStatus();
+}
+function finish() { pause(); S.finished = true; S.p = 1; updateStatus(); updateHud(); }
+function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
+function restart() {
+  pause(); S.p = 0; S.elapsed = 0; S.finished = false;
+  const v = 0; el.scroller.scrollTop = v; R.lastSet = v;
+  updateActive(0, true); updateHud(); startCountdown();
+}
+
+/* Cuenta atrás 3-2-1 (se puede omitir tocando) */
+function setDigit(n) { el.digit.textContent = n; }
+function startCountdown() {
+  clearTimeout(R.cd);
+  S.counting = true; el.count.hidden = false;
+  el.count.classList.remove('run'); void el.count.offsetWidth; el.count.classList.add('run');
+  setDigit(3); updateStatus();
+  R.cd = setTimeout(() => tickCountdown(2), 1000);
+}
+function tickCountdown(n) {
+  if (n <= 0) { endCountdown(true); return; }
+  setDigit(n); R.cd = setTimeout(() => tickCountdown(n - 1), 1000);
+}
+function endCountdown(start) {
+  clearTimeout(R.cd);
+  S.counting = false; el.count.hidden = true; el.count.classList.remove('run');
+  if (start) play(); else updateStatus();
+}
+
+function openReader() {
+  if (!S.text.trim()) return;
+  R.sy = window.scrollY;
+  S.view = 'reader'; S.words = countWords(S.text);
+  el.setup.hidden = true; el.reader.hidden = false;
+  buildText();
+  S.p = 0; S.elapsed = 0; S.finished = false; S.playing = false; R.last = null;
+  el.scroller.scrollTop = 0;
+  closePop();
+  layout();
+  updateHud(); startCountdown(); lockScreen();
+}
+function closeReader() {
+  pause(); endCountdown(false); closePop(); unlockScreen();
+  S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
+  renderSetup();
+  requestAnimationFrame(() => window.scrollTo(0, R.sy));
+}
+
+/* Ajustes rápidos durante la lectura */
+function openPop() { el.pop.hidden = false; el.btnMore.setAttribute('aria-expanded', 'true'); }
+function closePop() { el.pop.hidden = true; el.btnMore.setAttribute('aria-expanded', 'false'); }
+el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePop(); });
+press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
+press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
+el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
+press(el.btnSlow, () => setWpm(S.prefs.wpm - WPM[2]));
+press(el.btnFast, () => setWpm(S.prefs.wpm + WPM[2]));
+el.btnPlay.addEventListener('click', toggle);
+el.btnExit.addEventListener('click', closeReader);
+el.count.addEventListener('click', () => endCountdown(true));
+el.dock.addEventListener('mousedown', e => { if (e.target.closest('button')) e.preventDefault(); });   // no roba el foco del teclado
+document.addEventListener('pointerdown', e => {
+  if (el.pop.hidden || e.target.closest('#pop') || e.target.closest('#btnMore')) return;
+  closePop();
+  if (e.target.closest('#scroller')) { R.swallow = Date.now() + 500; }
+});
+
+/* Toque en el texto: pausa/reanuda. Arrastrar o usar la rueda pausa y reposiciona */
+el.scroller.addEventListener('click', () => { if (Date.now() < R.swallow) return; toggle(); });
+el.scroller.addEventListener('wheel', () => { if (S.playing) pause(); }, { passive: true });
+let touchY = 0;
+el.scroller.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+el.scroller.addEventListener('touchmove', e => { if (S.playing && Math.abs(e.touches[0].clientY - touchY) > 12) pause(); }, { passive: true });
+el.scroller.addEventListener('scroll', () => {
+  if (S.playing || S.counting) return;
+  const st = el.scroller.scrollTop;
+  if (Math.abs(st - R.lastSet) <= 2) return;
+  const max = maxScroll();
+  R.lastSet = st;
+  if (max > 2) S.p = clamp(st / max, 0, 1);
+  S.finished = S.p >= 0.999;
+  updateActive(st); updateHud(); updateStatus();
+}, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
+  if (e.key === 'Escape') { if (!el.pop.hidden) closePop(); else closeReader(); return; }
+  const onBtn = e.target && e.target.closest && e.target.closest('button');
+  if ((e.code === 'Space' || e.key === ' ' || e.key === 'Enter') && !onBtn) { e.preventDefault(); toggle(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); setWpm(S.prefs.wpm + WPM[2]); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); setWpm(S.prefs.wpm - WPM[2]); }
+});
+window.addEventListener('resize', () => { if (S.view === 'reader') { cancelAnimationFrame(R.rz); R.rz = requestAnimationFrame(layout); } });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (S.playing) pause(); flushPrefs(); }
+  else if (S.view === 'reader') lockScreen();
+});
+window.addEventListener('pagehide', flushPrefs);
+
+/* Mantiene la pantalla encendida mientras lees */
+async function lockScreen() {
+  try { if ('wakeLock' in navigator && !R.wake) { R.wake = await navigator.wakeLock.request('screen'); R.wake.addEventListener('release', () => { R.wake = null; }); } } catch (e) { R.wake = null; }
+}
+function unlockScreen() { try { if (R.wake) R.wake.release(); } catch (e) { /* nada */ } R.wake = null; }
+
+/* Inicio */
+renderSetup();
+renderLibrary();
+permState().then(st => {
+  if (st === 'granted') syncCloud();
+  else if (st === 'denied' || st === 'unavailable') Cloud.avail = false;
+});
+})();
+</script>
+</body>
+</html>
