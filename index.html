@@ -154,6 +154,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .w{opacity:.8;transition:opacity .25s,color .25s}
 .w.past{opacity:.3}
 .w.cur{opacity:1;color:#fffbe6}
+.nt{font-family:var(--mono);font-size:.5em;font-weight:500;color:var(--amber);vertical-align:middle}
+.w.cue.cur{color:var(--amber)}
 .band{position:absolute;left:0;right:0;top:calc(var(--guide) - var(--lh) / 2);height:var(--lh);pointer-events:none;z-index:2;background:rgba(251,191,36,.07);border-top:1px solid rgba(251,191,36,.16);border-bottom:1px solid rgba(251,191,36,.16)}
 .band::before,.band::after{content:"";position:absolute;top:50%;width:0;height:0;margin-top:-7px;border-top:7px solid transparent;border-bottom:7px solid transparent}
 .band::before{left:0;border-left:10px solid var(--amber)}
@@ -375,7 +377,9 @@ const el = {};
  'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
-const countWords = t => (t.match(/\S+/g) || []).length;
+const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
+const countWords = t => (t.replace(NOTE, ' ').match(/\S+/g) || []).length;
+const countNotes = t => (t.match(NOTE) || []).length;
 const fmt = s => {
   s = Math.max(0, Math.round(s));
   const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
@@ -426,7 +430,8 @@ function persistLib() { ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
 function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
 function renderSetup() {
   const w = S.words, wpm = S.prefs.wpm;
-  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' : 'Pega o escribe tu guion para empezar.';
+  const nn = w ? countNotes(S.text) : 0;
+  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' + (nn ? ' · ' + nn + (nn === 1 ? ' indicación' : ' indicaciones') + ' sin contar' : '') : 'Pega o escribe tu guion para empezar.';
   el.fsVal.textContent = S.prefs.fs;
   el.popFsVal.textContent = S.prefs.fs;
   el.wpmVal.textContent = wpm;
@@ -464,6 +469,7 @@ el.popMirror.addEventListener('click', () => setMirror(!S.prefs.mirror));
 el.tips.textContent = matchMedia('(pointer:fine)').matches
   ? 'Durante la lectura: toca el texto o pulsa Espacio para pausar · ↑ ↓ cambian la velocidad · Esc sale.'
   : 'Durante la lectura: toca el texto para pausar o reanudar.';
+el.tips.textContent += ' Escribe las indicaciones [entre corchetes]: se ven aparte y no suman tiempo.';
 
 /* ================= Biblioteca de guiones ================= */
 async function permState() {
@@ -692,16 +698,25 @@ function buildText() {
   const frag = document.createDocumentFragment();
   let prevGap = true;
   for (const row of S.text.replace(/\r\n?/g, '\n').trim().split('\n')) {
-    const words = row.trim().split(/\s+/).filter(Boolean);
+    const segs = [];                // [palabras, esIndicación]
+    let at = 0; const t = row.trim();
+    const add = (seg, note) => { const w = seg.split(/\s+/).filter(Boolean); if (w.length) segs.push([w, note]); };
+    for (const m of t.matchAll(NOTE)) { add(t.slice(at, m.index), false); add(m[0], true); at = m.index + m[0].length; }
+    add(t.slice(at), false);
     const p = document.createElement('p');
-    if (!words.length) {
+    if (!segs.length) {
       if (prevGap) continue;           // colapsa líneas en blanco seguidas
       p.className = 'ln gap'; prevGap = true; frag.appendChild(p); continue;
     }
     prevGap = false; p.className = 'ln';
-    words.forEach((w, i) => {
-      const s = document.createElement('span'); s.className = 'w'; s.textContent = w; p.appendChild(s);
-      if (i < words.length - 1) p.appendChild(document.createTextNode(' '));
+    segs.forEach(([words, note], j) => {
+      if (j) p.appendChild(document.createTextNode(' '));
+      let box = p;
+      if (note) { box = document.createElement('span'); box.className = 'nt'; p.appendChild(box); }   // espacios a tamaño de la nota
+      words.forEach((w, i) => {
+        const s = document.createElement('span'); s.className = note ? 'w cue' : 'w'; s.textContent = w; box.appendChild(s);
+        if (i < words.length - 1) box.appendChild(document.createTextNode(' '));
+      });
     });
     frag.appendChild(p);
   }
@@ -717,11 +732,11 @@ function measureLines() {
   const lines = []; let cur = null;
   for (const sp of R.spans) {
     const r = sp.getBoundingClientRect();
-    const top = r.top - sRect.top + st, bottom = r.bottom - sRect.top + st;
-    if (cur && Math.abs(top - cur.top) < tol) { cur.spans.push(sp); cur.bottom = Math.max(cur.bottom, bottom); }
-    else { cur = { top, bottom, spans: [sp], boxBottom: 0 }; lines.push(cur); }
+    const top = r.top - sRect.top + st, bottom = r.bottom - sRect.top + st, mid = (top + bottom) / 2;
+    if (cur && Math.abs(mid - cur.mid) < tol) { cur.spans.push(sp); cur.top = Math.min(cur.top, top); cur.bottom = Math.max(cur.bottom, bottom); }
+    else { cur = { top, bottom, mid, spans: [sp], boxBottom: 0 }; lines.push(cur); }
   }
-  for (const L of lines) L.boxBottom = (L.top + L.bottom) / 2 + R.lineH / 2;
+  for (const L of lines) L.boxBottom = L.mid + R.lineH / 2;
   R.lines = lines; R.active = -1;
   for (const sp of R.spans) sp.classList.remove('past', 'cur');
 }
