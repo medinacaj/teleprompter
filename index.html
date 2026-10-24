@@ -204,8 +204,9 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 #setup .field::placeholder{color:var(--faint)}
 #setup .field:focus{outline:2px solid rgba(251,191,36,.38);outline-offset:1px;border-color:var(--amber)}
 #setup textarea.field{display:block;min-height:300px;margin-top:12px;resize:vertical;line-height:1.55}
-#setup .setup-editor .meta{min-height:1.2em;margin:8px 2px 0;text-align:right;font-size:.76rem;color:var(--faint)}
-#setup .setup-settings{margin-top:45px}
+#setup .setup-editor .meta{margin:8px 2px 0;text-align:right;font-size:.76rem;color:var(--faint)}
+#setup .setup-editor .meta:empty{display:none}
+#setup .setup-settings{margin-top:28px}
 #setup .setup-settings .card{padding:2px 16px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
 #setup .setup-settings .row{padding:13px 0;min-height:68px;gap:14px;align-items:center}
 #setup .setup-settings .row+.row{border-top:1px solid var(--line)}
@@ -235,7 +236,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 #setup .setup-stats .btn{min-height:31px;padding:5px 11px;font-size:.74rem;border-radius:9px;background:transparent;border:1px solid var(--line)}
 @media(max-width:560px){
   #setup.wrap{padding:22px 15px 40px}
-  #setup .setup-settings{margin-top:31px}
+  #setup .setup-settings{margin-top:23px}
   #setup .setup-settings .card{padding:2px 14px}
   #setup .setup-settings .row{gap:8px;padding:14px 0}
   #setup .setup-settings .hint{max-width:27ch}
@@ -612,7 +613,7 @@ function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'fa
 function renderSetup() {
   const w = S.words, wpm = S.prefs.wpm;
   const nn = w ? countNotes(S.text) : 0;
-  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' + (nn ? ' · ' + nn + (nn === 1 ? ' indicación' : ' indicaciones') + ' sin contar' : '') : 'Pega o escribe tu guion para empezar.';
+  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' + (nn ? ' · ' + nn + (nn === 1 ? ' indicación' : ' indicaciones') + ' sin contar' : '') : '';
   el.fsVal.textContent = S.prefs.fs;
   el.popFsVal.textContent = S.prefs.fs;
   el.wpmVal.textContent = wpm;
