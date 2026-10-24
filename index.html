@@ -1066,9 +1066,12 @@ if (previousSession && typeof previousSession.text === 'string' && previousSessi
   if (window.confirm('Hay una lectura interrumpida. ¿Quieres recuperar su posición?')) {
     openReader();
     endCountdown(false);
-    S.p = clamp(previousSession.p, 0, 1);
+    S.p = clamp(previousSession.p, 0, 0.999);
     S.elapsed = Math.max(0, Number(previousSession.elapsed) || 0);
-    layout(); updateHud(); updateStatus();
+    layout();
+    const restoredPos = S.p * maxScroll();
+    el.scroller.scrollTop = restoredPos; R.lastSet = restoredPos;
+    updateActive(restoredPos, true); updateHud(); updateStatus();
     saveSession();
   } else clearSession();
 }
