@@ -728,6 +728,12 @@ el.tips.textContent = matchMedia('(pointer:fine)').matches
   : 'Durante la lectura: toca el texto para pausar o reanudar.';
 el.tips.textContent += ' Escribe las indicaciones [entre corchetes]: se ven aparte y no suman tiempo.';
 
+// El panel de ayuda no ocupa una fila ni queda abierto al usar otro control.
+const helpPanel = $('.help-disclosure');
+document.addEventListener('pointerdown', e => {
+  if (helpPanel.open && !helpPanel.contains(e.target)) helpPanel.open = false;
+}, { passive: true });
+
 /* ================= Biblioteca de guiones ================= */
 async function permState() {
   try {
@@ -1345,7 +1351,15 @@ el.scroller.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('keydown', e => {
-  if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
+  if (S.view === 'setup') {
+    if (e.key === 'Escape' && !el.lib.hidden) { closeLib(); e.preventDefault(); }
+    else if (e.key === 'Escape' && helpPanel.open) {
+      helpPanel.open = false;
+      helpPanel.querySelector('summary').focus();
+      e.preventDefault();
+    }
+    return;
+  }
   // No interceptar atajos mientras se utiliza un control interactivo.
   const target = e.target;
   const interactive = target && target.closest &&
