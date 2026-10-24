@@ -1,7 +1,7 @@
 {
   "name": "Prompter — Lector de guiones",
   "short_name": "Prompter",
-  "description": "Teleprompter Studio: lectura inmersiva de guiones con ajustes de velocidad, modo espejo y biblioteca local.",
+  "description": "Teleprompter web: lee tu guion con velocidad en palabras por minuto, cuenta atrás, línea guía, modo espejo y biblioteca local.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
