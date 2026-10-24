@@ -139,11 +139,14 @@ assert.match(html, /STUDIO EDITION/);
 assert.match(html, /<header class="studio-hero">/);
 assert.match(html, /class="editor-panel" aria-labelledby="editorHeading"/);
 assert.match(html, /class="settings-panel" aria-labelledby="settingsHeading"/);
-assert.match(html, /class="launch-panel" aria-labelledby="launchHeading"/);
+assert.match(html, /class="launch-panel" aria-label="Acciones del guion"/);
 assert.match(html, /class="session-panel" aria-label="Estadísticas locales"/);
 assert.match(html, /--bg:#000000; --panel:#1d1d1f/);
 assert.match(html, /--btn:#0071e3; --btn-h:#1687fa/);
-assert.match(html, /\.studio-hero h1\{/);
+assert.match(html, /<h1>Prompter<\/h1>/);
+for (const removedText of ['Tu guion.', 'A tu ritmo.', 'Lectura inmersiva', 'Ajustes precisos', 'Guardado local', 'Todo listo para empezar.']) {
+  assert.ok(!html.includes(removedText), 'Unwanted promotional text: ' + removedText);
+}
 assert.match(html, /@media\(max-width:560px\)/);
 assert.match(html, /\.band\{background:rgba\(41,151,255/);
-console.log('OK: Studio Edition design, responsive panels, blue reading guide and PWA theme');
+console.log('OK: compact dark interface without marketing content, blue reading guide and PWA theme');
