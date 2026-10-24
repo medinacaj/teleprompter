@@ -151,6 +151,9 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .paper{max-width:780px;margin:0 auto;padding-left:22px;padding-right:22px}
 .text{font-family:var(--serif);font-size:var(--fs);line-height:1.5;color:var(--text)}
 .reader.mirror .text{transform:scaleX(-1)}
+.reader.high-contrast .w{opacity:1;color:#fff}
+.reader.high-contrast .w.past{opacity:.55}
+.reader.high-contrast .w.cur{color:#fde68a;text-decoration:underline;text-underline-offset:.12em}
 .ln{margin:0;overflow-wrap:anywhere}
 .ln.gap{height:.9em}
 .w{opacity:.8;transition:opacity .25s,color .25s}
@@ -326,6 +329,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <div class="row" style="padding-bottom:0;border-top:1px solid var(--line)">
         <button type="button" class="btn" id="btnRestart"><svg class="ic" aria-hidden="true"><use href="#i-replay"/></svg>Reiniciar lectura</button>
         <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
+        <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
       </div>
     </div>
     <div class="controls">
@@ -364,7 +368,7 @@ const ls = {
 /* Estado */
 const S = {
   title: '', text: '', words: 0,
-  prefs: { fs: 44, wpm: 140, mirror: false },
+  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false },
   scripts: [], dels: [],
   view: 'setup',
   playing: false, finished: false, counting: false,
@@ -378,7 +382,7 @@ const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','btnFullscreen','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -412,6 +416,7 @@ function press(btn, fn) {
     if (typeof p.fs === 'number') S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
     if (typeof p.wpm === 'number') S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
     S.prefs.mirror = !!p.mirror;
+    S.prefs.contrast = !!p.contrast;
   }
   const d = ls.get(K_LIB);
   if (d && Array.isArray(d.scripts)) {
@@ -447,6 +452,8 @@ function renderSetup() {
   el.wpmVal.textContent = wpm;
   setSwitch(el.mirrorSw, S.prefs.mirror);
   setSwitch(el.popMirror, S.prefs.mirror);
+  setSwitch(el.readerContrast, S.prefs.contrast);
+  el.reader.classList.toggle('high-contrast', S.prefs.contrast);
   el.reader.classList.toggle('mirror', S.prefs.mirror);
   const has = !!S.text.trim();
   el.btnSave.disabled = !has;
@@ -476,6 +483,7 @@ press(el.wpmDown, () => setWpm(S.prefs.wpm - WPM[2]));
 press(el.wpmUp, () => setWpm(S.prefs.wpm + WPM[2]));
 el.mirrorSw.addEventListener('click', () => setMirror(!S.prefs.mirror));
 el.popMirror.addEventListener('click', () => setMirror(!S.prefs.mirror));
+el.readerContrast.addEventListener('click', () => { S.prefs.contrast = !S.prefs.contrast; savePrefs(); renderSetup(); });
 el.tips.textContent = matchMedia('(pointer:fine)').matches
   ? 'Durante la lectura: toca el texto o pulsa Espacio para pausar · ↑ ↓ cambian la velocidad · Esc sale.'
   : 'Durante la lectura: toca el texto para pausar o reanudar.';
