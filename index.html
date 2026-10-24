@@ -149,7 +149,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .scroller{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:pointer}
 .scroller::-webkit-scrollbar{display:none}
 .paper{max-width:780px;margin:0 auto;padding-left:22px;padding-right:22px}
-.text{font-family:var(--serif);font-size:var(--fs);line-height:var(--line-spacing,1.5);color:var(--text)}
+.text{font-family:var(--reader-font,var(--serif));font-size:var(--fs);line-height:var(--line-spacing,1.5);color:var(--text)}
 .reader.mirror .text{transform:scaleX(-1)}
 .reader.high-contrast .w{opacity:1;color:#fff}
 .reader.high-contrast .w.past{opacity:.55}
@@ -335,7 +335,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
         <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
         <button type="button" class="btn" id="btnBookmarkSave">Guardar marcador</button>
         <button type="button" class="btn" id="btnBookmarkGo">Ir al marcador</button>
-        <div class="row"><span class="lbl">Interlineado</span><div class="stepper"><button type="button" class="step" id="lineDown" aria-label="Reducir interlineado">−</button><span class="val" id="lineVal">1.5</span><button type="button" class="step" id="lineUp" aria-label="Aumentar interlineado">+</button></div></div>
+        <div class="row"><span class="lbl">Tipo de letra</span><select id="readerFont" class="field" aria-label="Tipo de letra del lector"><option value="serif">Clásica</option><option value="sans">Moderna</option><option value="mono">Monoespaciada</option></select></div>
+       <div class="row"><span class="lbl">Interlineado</span><div class="stepper"><button type="button" class="step" id="lineDown" aria-label="Reducir interlineado">−</button><span class="val" id="lineVal">1.5</span><button type="button" class="step" id="lineUp" aria-label="Aumentar interlineado">+</button></div></div>
        <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
       </div>
     </div>
@@ -375,7 +376,7 @@ const ls = {
 /* Estado */
 const S = {
   title: '', text: '', words: 0,
-  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false, lineSpacing: LH },
+  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false, lineSpacing: LH, font: 'serif' },
   scripts: [], dels: [],
   view: 'setup',
   playing: false, finished: false, counting: false,
@@ -389,7 +390,7 @@ const el = {};
 ['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','readerFont','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -425,6 +426,7 @@ function press(btn, fn) {
     S.prefs.mirror = !!p.mirror;
     S.prefs.contrast = !!p.contrast;
     if (Number.isFinite(p.lineSpacing)) S.prefs.lineSpacing = clamp(Math.round(p.lineSpacing * 10) / 10, 1.1, 2.1);
+    if (['serif','sans','mono'].includes(p.font)) S.prefs.font = p.font;
   }
   const d = ls.get(K_LIB);
   if (d && Array.isArray(d.scripts)) {
@@ -982,6 +984,18 @@ function setLineSpacing(v) {
 press(el.lineDown, () => setLineSpacing(S.prefs.lineSpacing - 0.1));
 press(el.lineUp, () => setLineSpacing(S.prefs.lineSpacing + 0.1));
 setLineSpacing(S.prefs.lineSpacing);
+const readerFonts = { serif: 'var(--serif)', sans: 'var(--sans)', mono: 'var(--mono)' };
+function setReaderFont(font) {
+  if (!Object.hasOwn(readerFonts, font)) return;
+  S.prefs.font = font;
+  el.readerFont.value = font;
+  el.reader.style.setProperty('--reader-font', readerFonts[font]);
+  savePrefs();
+  if (S.view === 'reader') layout();
+}
+el.readerFont.addEventListener('change', () => setReaderFont(el.readerFont.value));
+setReaderFont(S.prefs.font);
+
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
