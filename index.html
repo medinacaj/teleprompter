@@ -339,6 +339,59 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
   .speed-head output{font-size:.68rem}
 }
 
+
+/* Identidad visual discreta: claqueta y pequeños acentos cálidos. */
+#setup .setup-header{display:flex;align-items:center;gap:15px;margin-bottom:23px}
+#setup .brand-icon{
+  display:grid;place-items:center;flex:none;width:54px;height:54px;
+  border:1px solid rgba(251,191,36,.25);border-radius:17px;
+  background:linear-gradient(145deg,#29241a,#191a20);
+  font-size:1.68rem;line-height:1;
+}
+#setup .brand-content{min-width:0}
+#setup .brand-content h1{margin:6px 0 3px;font-size:clamp(1.47rem,3vw,1.85rem)}
+#setup .brand-content .tag{font-size:.66rem;color:#fbbf24}
+#setup .brand-content .sub{font-size:.88rem}
+#setup .setup-settings .card{
+  position:relative;overflow:hidden;
+  background:#17181c;border-color:#303138;
+}
+#setup .setup-settings .card::before{
+  content:"";display:block;height:2px;
+  background:linear-gradient(90deg,#fbbf24 0%,#38bdf8 48%,transparent 87%);
+  opacity:.68;
+}
+#setup .setup-settings .row{padding-block:12px}
+#setup .step{transition:background .16s,border-color .16s,color .16s}
+#setup .step:hover{background:#2e2a22;border-color:rgba(251,191,36,.48);color:#fcd34d}
+#setup .actions .btn.primary{box-shadow:0 5px 18px rgba(245,158,11,.14)}
+#setup .actions .btn:not(.primary):hover:not(:disabled){border-color:rgba(251,191,36,.4)}
+#setup .help-disclosure{margin:12px 2px 0;color:#9696a3;font-size:.76rem}
+#setup .help-disclosure summary{
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  color:#b1b1bc;line-height:1.5;padding:6px 9px;
+  border:1px solid transparent;border-radius:10px;list-style:none;
+  transition:color .16s ease,background .16s ease;
+}
+#setup .help-disclosure summary::-webkit-details-marker{display:none}
+#setup .help-disclosure summary::after{
+  content:"⌄";font-size:.93rem;color:#fbbf24;margin-left:4px;
+  transition:transform .16s ease;
+}
+#setup .help-disclosure[open] summary::after{transform:rotate(180deg)}
+#setup .help-disclosure summary:hover{background:#1d1d22;color:#f5f5f7}
+#setup .help-disclosure summary:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
+#setup .help-disclosure .tips{margin:3px 8px 7px;max-width:65ch;color:#aaaab6;line-height:1.55}
+@media(max-width:560px){
+  #setup .setup-header{gap:12px;margin-bottom:20px}
+  #setup .brand-icon{width:47px;height:47px;border-radius:14px;font-size:1.5rem}
+  #setup .brand-content h1{font-size:1.38rem}
+  #setup .brand-content .sub{font-size:.81rem}
+}
+@media(prefers-reduced-motion:reduce){
+  #setup .help-disclosure summary,#setup .help-disclosure summary::after{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -365,10 +418,13 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 <!-- ============ CONFIGURACIÓN ============ -->
 <main id="setup" class="wrap">
   <header class="setup-header">
-    <div class="tag"><span class="dot" aria-hidden="true"></span> PROMPTER</div>
-    <h1>Lector de guiones</h1>
-    <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
-    <noscript><p class="sub">Activa JavaScript para utilizar el teleprompter.</p></noscript>
+    <span class="brand-icon" aria-hidden="true">🎬</span>
+    <div class="brand-content">
+      <div class="tag">PROMPTER</div>
+      <h1>Lector de guiones</h1>
+      <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
+      <noscript><p class="sub">Activa JavaScript para utilizar el teleprompter.</p></noscript>
+    </div>
   </header>
 
   <section class="setup-editor" aria-label="Editor de guion">
@@ -408,7 +464,10 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
     <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
   </div>
   <p class="flash" id="flash" role="status"></p>
-  <p class="tips" id="tips"></p>
+  <details class="help-disclosure">
+    <summary><span aria-hidden="true">⌨️</span> Ayuda y atajos</summary>
+    <p class="tips" id="tips"></p>
+  </details>
   <div class="setup-stats">
     <p class="meta" id="readingStats" aria-live="polite"></p>
     <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
