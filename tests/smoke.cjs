@@ -44,3 +44,8 @@ for (const feature of ['duplicateScript(', 'btnBookmarkSave', 'btnBookmarkGo', '
   assert.ok(html.includes(feature), 'Missing feature ' + feature);
 }
 console.log('OK: script duplication and reading bookmarks');
+
+assert.match(html, /id="libSort"/);
+assert.match(html, /localeCompare\(b\.name, 'es'\)/);
+assert.match(html, /Math\.imul\(h, 16777619\)/);
+console.log('OK: library sorting and compact bookmark key');
