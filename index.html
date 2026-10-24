@@ -961,6 +961,10 @@ if (previousSession && typeof previousSession.text === 'string' && previousSessi
     saveSession();
   } else clearSession();
 }
+/* Modo sin conexión: solo recursos estáticos del mismo origen. */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* lectura en línea disponible */ }));
+}
 /* Inicio */
 renderSetup();
 renderLibrary();
