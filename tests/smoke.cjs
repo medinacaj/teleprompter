@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v8/);
+assert.match(worker, /prompter-static-v9/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -173,3 +173,12 @@ assert.ok(!html.includes('Pega o escribe tu guion para empezar.'), 'Do not repea
 assert.match(html, /#setup \.setup-editor \.meta:empty\{display:none\}/);
 assert.match(html, /: '';/);
 console.log('OK: empty editor shows no redundant message; entered text retains word-count metadata');
+
+assert.match(html, /class="brand-icon" aria-hidden="true">🎬<\/span>/);
+assert.match(html, /class="brand-content"/);
+assert.match(html, /<details class="help-disclosure">/);
+assert.match(html, /<summary><span aria-hidden="true">⌨️<\/span> Ayuda y atajos<\/summary>/);
+assert.match(html, /class="tips" id="tips"/);
+assert.match(html, /#setup \.setup-settings \.card::before/);
+assert.match(html, /#setup \.actions \.btn\.primary\{box-shadow:/);
+console.log('OK: refined header identity, compact accent and accessible optional shortcuts');
