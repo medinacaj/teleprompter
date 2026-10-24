@@ -135,21 +135,26 @@ console.log('OK: cloud deletion tombstones are persisted atomically');
 assert.equal(manifest.theme_color, '#000000');
 assert.equal(manifest.background_color, '#000000');
 assert.match(html, /<meta name="theme-color" content="#000000">/);
-assert.match(html, /STUDIO EDITION/);
-assert.match(html, /<header class="studio-hero">/);
-assert.match(html, /class="editor-panel" aria-labelledby="editorHeading"/);
-assert.match(html, /class="settings-panel" aria-labelledby="settingsHeading"/);
-assert.match(html, /class="launch-panel" aria-label="Acciones del guion"/);
-assert.match(html, /class="session-panel" aria-label="Estadísticas locales"/);
-assert.match(html, /--bg:#000000; --panel:#1d1d1f/);
-assert.match(html, /--btn:#0071e3; --btn-h:#1687fa/);
-assert.match(html, /<h1>Prompter<\/h1>/);
+assert.match(html, /<main id="setup" class="wrap">/);
+assert.match(html, /<header class="setup-header">/);
+assert.match(html, /<h1>Lector de guiones<\/h1>/);
+assert.match(html, /class="setup-editor" aria-label="Editor de guion"/);
+assert.match(html, /class="setup-settings" aria-label="Ajustes de lectura"/);
+assert.match(html, /class="card"/);
+assert.match(html, /class="actions"/);
+assert.match(html, /class="setup-stats"/);
+assert.match(html, /#setup\.wrap\{display:block;max-width:748px/);
+assert.match(html, /--amber:#fbbf24;--btn:#f59e0b/);
+assert.match(html, /#setup \.actions \.btn\.primary/);
+assert.match(html, /@media\(max-width:560px\)/);
+assert.match(html, /\.band\{background:rgba\(41,151,255/);
 for (const removedText of ['Tu guion.', 'A tu ritmo.', 'Lectura inmersiva', 'Ajustes precisos', 'Guardado local', 'Todo listo para empezar.']) {
   assert.ok(!html.includes(removedText), 'Unwanted promotional text: ' + removedText);
 }
-assert.match(html, /@media\(max-width:560px\)/);
-assert.match(html, /\.band\{background:rgba\(41,151,255/);
-console.log('OK: compact dark interface without marketing content, blue reading guide and PWA theme');
+for (const obsolete of ['class="studio-hero"', 'class="editor-panel"', 'class="settings-panel"', 'class="launch-panel"']) {
+  assert.ok(!html.includes(obsolete), 'Old oversized component: ' + obsolete);
+}
+console.log('OK: compact single-column setup, subtle amber accent and preserved reader design');
 
 assert.match(html, /id="speedRange"/);
 assert.match(html, /id="speedValue"/);
