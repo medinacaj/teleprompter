@@ -116,3 +116,7 @@ assert.match(html, /touchMoved = true/);
 assert.match(html, /R\.swallow = Date\.now\(\) \+ 500/);
 assert.match(html, /document\.fullscreenElement === el\.reader\) \{ \/\* El navegador gestiona Escape/);
 console.log('OK: touch-scroll playback guard and fullscreen Escape handling');
+
+assert.match(html, /else if \(!interactive\) \{ closeReader\(\); e\.preventDefault\(\); \}/);
+assert.match(html, /el\.btnStart\.focus\(\{ preventScroll: true \}\)/);
+console.log('OK: reader keyboard focus and native Escape behavior');
