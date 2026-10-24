@@ -39,3 +39,8 @@ for (const id of ['btnFullscreen', 'readerContrast', 'rWords']) {
 assert.match(html, /fullscreenchange/);
 assert.match(html, /high-contrast/);
 console.log('OK: fullscreen, high contrast and reading progress');
+
+for (const feature of ['duplicateScript(', 'btnBookmarkSave', 'btnBookmarkGo', 'K_BOOKMARKS']) {
+  assert.ok(html.includes(feature), 'Missing feature ' + feature);
+}
+console.log('OK: script duplication and reading bookmarks');
