@@ -86,3 +86,8 @@ assert.match(html, /id="readerFont"/);
 assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
+
+assert.match(worker, /prompter-static-v3/);
+assert.match(worker, /url\.origin !== self\.location\.origin/);
+assert.match(worker, /request\.method !== 'GET'/);
+console.log('OK: PWA cache rotation and same-origin GET-only caching');
