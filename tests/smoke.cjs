@@ -16,7 +16,7 @@ for (const [, attrs, body] of scripts) {
   }
 }
 for (const id of ['setup','reader','scroller','rText','btnPlay','btnStart','btnSave','btnImport','btnExport']) {
-  assert.match(html, new RegExp('id=["\\\']' + id + '["\\\']'), 'Missing element ' + id);
+  assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), 'Missing element ' + id);
 }
 assert.match(html, /visibilitychange/);
 assert.match(html, /flushDraft\(\)/);
