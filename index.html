@@ -1066,10 +1066,17 @@ document.addEventListener('pointerdown', e => {
 
 /* Toque en el texto: pausa/reanuda. Arrastrar o usar la rueda pausa y reposiciona */
 el.scroller.addEventListener('click', () => { if (Date.now() < R.swallow) return; toggle(); });
-el.scroller.addEventListener('wheel', () => { if (S.playing) pause(); }, { passive: true });
-let touchY = 0;
-el.scroller.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
-el.scroller.addEventListener('touchmove', e => { if (S.playing && Math.abs(e.touches[0].clientY - touchY) > 12) pause(); }, { passive: true });
+el.scroller.addEventListener('wheel', () => { R.swallow = Date.now() + 400; if (S.playing) pause(); }, { passive: true });
+let touchY = 0, touchMoved = false;
+el.scroller.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; touchMoved = false; }, { passive: true });
+el.scroller.addEventListener('touchmove', e => {
+  if (Math.abs(e.touches[0].clientY - touchY) > 12) {
+    touchMoved = true;
+    R.swallow = Date.now() + 500;
+    if (S.playing) pause();
+  }
+}, { passive: true });
+el.scroller.addEventListener('touchend', () => { if (touchMoved) R.swallow = Date.now() + 500; }, { passive: true });
 el.scroller.addEventListener('scroll', () => {
   if (S.playing || S.counting) return;
   const st = el.scroller.scrollTop;
