@@ -2,18 +2,18 @@
   "name": "Prompter — Lector de guiones",
   "short_name": "Prompter",
   "description": "Teleprompter web: lee tu guion con velocidad en palabras por minuto, cuenta atrás, línea guía, modo espejo y biblioteca local.",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/app/",
+  "scope": "/app/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0b0a12",
+  "theme_color": "#0b0a12",
   "lang": "es",
   "icons": [
     {
-      "src": "./icon.svg",
+      "src": "/app/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

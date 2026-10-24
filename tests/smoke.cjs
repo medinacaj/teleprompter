@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
-const html = fs.readFileSync('index.html', 'utf8');
+const html = fs.readFileSync('public/app/index.html', 'utf8');
 assert.match(html, /^<!doctype html>/i);
 assert.equal((html.match(/<script\b/gi) || []).length, (html.match(/<\/script>/gi) || []).length);
 assert.equal((html.match(/<style\b/gi) || []).length, (html.match(/<\/style>/gi) || []).length);
@@ -22,11 +22,11 @@ assert.match(html, /visibilitychange/);
 assert.match(html, /flushDraft\(\)/);
 console.log('OK: HTML structure, JavaScript syntax, schema and essential controls');
 
-const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+const manifest = JSON.parse(fs.readFileSync('public/app/manifest.webmanifest', 'utf8'));
 assert.equal(manifest.display, 'standalone');
 assert.ok(manifest.icons.length);
-for (const icon of manifest.icons) assert.ok(fs.existsSync(icon.src.replace(/^\.\//, '')));
-const worker = fs.readFileSync('sw.js', 'utf8');
+for (const icon of manifest.icons) assert.ok(fs.existsSync('public' + icon.src));
+const worker = fs.readFileSync('public/app/sw.js', 'utf8');
 new vm.Script(worker, { filename: 'sw.js' });
 assert.match(html, /serviceWorker\.register/);
 assert.match(html, /id="libSearch"/);
@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v11/);
+assert.match(worker, /prompter-static-v12/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -132,9 +132,9 @@ assert.match(html, /S\.scripts = previous; S\.dels = previousDels/);
 assert.match(html, /S\.dels = S\.dels\.filter\(x => x !== id\)/);
 console.log('OK: cloud deletion tombstones are persisted atomically');
 
-assert.equal(manifest.theme_color, '#000000');
-assert.equal(manifest.background_color, '#000000');
-assert.match(html, /<meta name="theme-color" content="#000000">/);
+assert.equal(manifest.theme_color, '#0b0a12');
+assert.equal(manifest.background_color, '#0b0a12');
+assert.match(html, /<meta name="theme-color" content="#0b0a12">/);
 assert.match(html, /<main id="setup" class="wrap">/);
 assert.match(html, /<header class="setup-header">/);
 assert.match(html, /<h1>Lector de guiones<\/h1>/);
@@ -174,7 +174,7 @@ assert.match(html, /#setup \.setup-editor \.meta:empty\{display:none\}/);
 assert.match(html, /: '';/);
 console.log('OK: empty editor shows no redundant message; entered text retains word-count metadata');
 
-assert.match(html, /class="brand-icon" aria-hidden="true">🎬<\/span>/);
+assert.match(html, /<img class="brand-icon" src="\/app\/icon\.svg" alt=""/);
 assert.match(html, /class="brand-content"/);
 assert.match(html, /<details class="help-disclosure">/);
 assert.match(html, /<summary aria-label="Ayuda y atajos" title="Ayuda y atajos">/);
@@ -200,7 +200,7 @@ assert.match(html, /savedAt: validSavedAt\(x\.savedAt\)/);
 assert.match(html, /String\(x\.name \|\| 'Guion'\)\.slice\(0, 80\)/);
 assert.match(html, /No se pudo guardar el borrador/);
 assert.ok(!html.includes('S.text.length > 200000'), 'Use MAX_SCRIPT_LENGTH');
-assert.match(fs.readFileSync('sitemap.xml', 'utf8'), /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+assert.match(fs.readFileSync('public/sitemap.xml', 'utf8'), /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
 console.log('OK: visible reader notices, no third-party fonts, bounded imports and draft warnings');
 
 assert.match(html, /const hasUnsavedText = \(\) =>/);
@@ -210,3 +210,33 @@ assert.match(html, /function uniqueName\(base\)/);
 assert.match(html, /id: S\.loadedId \}/);
 assert.match(html, /isJson = ext === 'json'/);
 console.log('OK: unsaved-editor guard, title collision prompt and .txt imports starting with [cues]');
+
+const landing = fs.readFileSync('public/index.html', 'utf8');
+for (const page of ['index.html', 'login/index.html', 'cuenta/index.html', 'legal/index.html']) {
+  const src = fs.readFileSync('public/' + page, 'utf8');
+  assert.match(src, /^<!doctype html>/i, page);
+  assert.match(src, /href="\/assets\/site\.css"/, page);
+  for (const [, attrs, body] of src.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (/application\/ld\+json/i.test(attrs)) JSON.parse(body);
+    else if (!/\bsrc\s*=/.test(attrs)) new vm.Script(body, { filename: page });
+  }
+  assert.ok(!/https?:\/\/(?!schema\.org)[^"' ]+\.(js|css)\b/.test(src), page + ' must not load third-party code');
+}
+new vm.Script(fs.readFileSync('public/assets/site.js', 'utf8'), { filename: 'site.js' });
+assert.match(landing, /US\$1/);
+assert.match(html, /navigator\.serviceWorker\.register\('\/app\/sw\.js', \{ scope: '\/app\/' \}\)/);
+assert.match(html, /async function verifyAccess\(\)/);
+assert.match(html, /OFFLINE_GRACE = 72 \* 3600000/);
+assert.match(html, /id="paywall" hidden role="dialog"/);
+assert.match(html, /noindex, nofollow/);
+assert.match(worker, /!response\.redirected/);
+const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+const allHeaders = vercel.headers.flatMap(h => h.headers.map(x => x.key));
+for (const h of ['Content-Security-Policy', 'X-Frame-Options', 'Strict-Transport-Security', 'X-Content-Type-Options']) assert.ok(allHeaders.includes(h), 'Missing header ' + h);
+assert.match(fs.readFileSync('middleware.js', 'utf8'), /matcher: \['\/app', '\/app\/:path\*'\]/);
+assert.match(fs.readFileSync('public/robots.txt', 'utf8'), /Disallow: \/app\//);
+console.log('OK: landing, account pages, subscription guard, gated app routes and security headers');
+
+assert.equal(vercel.outputDirectory, 'public', 'Only public/ is served as static files');
+for (const priv of ['lib', 'api', 'tests', 'supabase', 'docs', '.env.example']) assert.ok(!fs.existsSync('public/' + priv), priv + ' must not be public');
+console.log('OK: only public/ is deployed as static content');

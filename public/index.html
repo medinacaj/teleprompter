@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Prompter — Teleprompter web para grabar sin olvidar tu guion</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía y modo espejo. Suscripción de US$1 al mes.">
+<meta name="theme-color" content="#0b0a12">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Prompter — Teleprompter web">
+<meta property="og:description" content="Lee tu guion mirando a cámara: velocidad en ppm, cuenta atrás, línea guía y modo espejo.">
+<meta property="og:site_name" content="Prompter">
+<meta property="og:image" content="/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Prompter — Lector de guiones","description":"Teleprompter web en español: pega tu guion, ajusta la velocidad y lee con cuenta atrás, línea guía y modo espejo.","applicationCategory":"MultimediaApplication","operatingSystem":"Cualquiera (navegador web)","inLanguage":"es-CL","offers":{"@type":"Offer","price":"1.00","priceCurrency":"USD","category":"subscription"}}
+</script>
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="36" height="36">Prompter</a>
+    <nav class="nav-links" aria-label="Principal">
+      <a class="hide-sm" href="#funciones">Funciones</a>
+      <a class="hide-sm" href="#precio">Precio</a>
+      <a class="hide-sm" href="#preguntas">Preguntas</a>
+      <a href="/login/">Ingresar</a>
+      <a class="btn btn-primary" href="/login/?modo=registro">Empezar</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="reveal">
+      <span class="eyebrow"><span class="rec" aria-hidden="true"></span>Teleprompter web en español</span>
+      <h1>Mira a cámara.<br><span class="grad-text">Tu guion te sigue.</span></h1>
+      <p class="lead">Pega tu texto, elige la velocidad en palabras por minuto y graba con una línea guía que marca exactamente dónde vas. Sin instalar nada, en el teléfono o el computador.</p>
+      <div class="cta">
+        <a class="btn btn-primary btn-lg" href="/login/?modo=registro">Suscribirme por US$1/mes</a>
+        <a class="btn btn-lg" href="#funciones">Ver funciones</a>
+      </div>
+      <p class="fine">Cancela cuando quieras. Tus guiones se guardan en tu dispositivo.</p>
+    </div>
+
+    <div class="reveal visual" aria-hidden="true">
+      <div class="device">
+        <div class="screen">
+          <div class="hud"><span>0:42 / 2:10</span><span><b>●</b> LEYENDO · 140 ppm</span></div>
+          <div class="roll">
+            <p>Hola a todos, bienvenidos al canal.</p>
+            <p>Hoy les quiero contar algo <span class="cue">[sonrisa]</span> que cambió mi forma de grabar.</p>
+            <p>Antes repetía cada toma cinco o seis veces.</p>
+            <p>Ahora leo el guion mirando a la cámara <span class="cue">[pausa]</span></p>
+            <p>y el texto avanza a mi ritmo.</p>
+            <p>Puedo pausar con un toque, cambiar la velocidad</p>
+            <p>y activar el modo espejo para el vidrio.</p>
+            <p>Hola a todos, bienvenidos al canal.</p>
+            <p>Hoy les quiero contar algo que cambió mi forma de grabar.</p>
+          </div>
+          <div class="guide"></div>
+          <div class="fade t"></div><div class="fade b"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+      <div class="chip c1"><i></i>Cuenta atrás 3·2·1</div>
+      <div class="chip c2">⇆ Modo espejo</div>
+    </div>
+  </div>
+
+  <section id="funciones">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Funciones</span>
+        <h2>Todo lo necesario para <span class="grad-text">grabar de una</span></h2>
+        <p>Diseñado para creadores, docentes, periodistas y equipos que graban mirando a cámara.</p>
+      </div>
+      <div class="grid">
+        <article class="card reveal"><div class="icon i1"><svg viewBox="0 0 24 24"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg></div><h3>Velocidad en ppm</h3><p>Fija las palabras por minuto y ajústalas en vivo con un deslizador mientras lees.</p></article>
+        <article class="card reveal"><div class="icon i2"><svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="m15 6 6 6-6 6"/></svg></div><h3>Línea guía</h3><p>La línea activa se resalta y lo ya leído se atenúa: nunca pierdes el hilo.</p></article>
+        <article class="card reveal"><div class="icon i3"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 2v20"/></svg></div><h3>Modo espejo</h3><p>Invierte el texto para teleprompters con vidrio reflectante.</p></article>
+        <article class="card reveal"><div class="icon i4"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m17 15 3 3-3 3"/></svg></div><h3>Indicaciones [entre corchetes]</h3><p>Escribe notas como [pausa] o [sonrisa]: se ven aparte y no suman tiempo.</p></article>
+        <article class="card reveal"><div class="icon i5"><svg viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg></div><h3>Biblioteca y marcadores</h3><p>Guarda, busca, duplica, exporta e importa guiones. Retoma donde quedaste.</p></article>
+        <article class="card reveal"><div class="icon i6"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div><h3>Funciona sin conexión</h3><p>Instálalo como app en el teléfono y mantén la pantalla encendida mientras grabas.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal"><span class="eyebrow">Cómo funciona</span><h2>De tu texto a la toma en <span class="grad-text">un minuto</span></h2></div>
+      <div class="steps">
+        <div class="step reveal"><h3>Crea tu cuenta</h3><p>Regístrate con tu correo y activa la suscripción de US$1 al mes.</p></div>
+        <div class="step reveal"><h3>Pega tu guion</h3><p>Ajusta tamaño de letra, velocidad y espejo. Ves la duración estimada al instante.</p></div>
+        <div class="step reveal"><h3>Graba</h3><p>Cuenta atrás, lectura fluida y control con un toque o con el teclado.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="precio">
+    <div class="wrap">
+      <div class="section-head reveal"><span class="eyebrow">Precio</span><h2>Un plan, <span class="grad-text">todo incluido</span></h2></div>
+      <div class="price reveal">
+        <div class="price-in">
+          <span class="badge wait">Mensual</span>
+          <div class="amount">US$1<small> / mes</small></div>
+          <p class="lead" style="margin:0 auto">Acceso completo a Prompter en todos tus dispositivos.</p>
+          <ul class="checks">
+            <li>Lector con velocidad en vivo, línea guía y espejo</li>
+            <li>Biblioteca, marcadores, exportación e importación</li>
+            <li>Modo sin conexión e instalación como app</li>
+            <li>Pago recurrente con PayPal; cancela cuando quieras</li>
+          </ul>
+          <a class="btn btn-primary btn-lg btn-block" href="/login/?modo=registro">Crear mi cuenta</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="preguntas">
+    <div class="wrap">
+      <div class="section-head reveal"><span class="eyebrow">Preguntas</span><h2>Preguntas frecuentes</h2></div>
+      <div class="faq reveal">
+        <details><summary>¿Dónde se guardan mis guiones?</summary><p>En el almacenamiento local de tu navegador. Puedes exportarlos en un archivo cuando quieras. Prompter no lee ni envía tus guiones a nuestros servidores.</p></details>
+        <details><summary>¿Cómo se cobra la suscripción?</summary><p>US$1 al mes mediante PayPal. Puedes cancelar desde tu cuenta de PayPal; mantienes el acceso hasta el fin del periodo pagado.</p></details>
+        <details><summary>¿Funciona en el teléfono?</summary><p>Sí. Está pensado primero para móviles y también funciona en computadores y tablets.</p></details>
+        <details><summary>¿Graba audio o video?</summary><p>No. Prompter solo muestra el texto; graba con la cámara o aplicación que prefieras.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Prompter. Todos los derechos reservados.</span>
+    <nav aria-label="Legal"><a href="/legal/#terminos">Términos</a><a href="/legal/#privacidad">Privacidad</a><a href="/login/">Ingresar</a></nav>
+  </div>
+</footer>
+<script src="/assets/site.js"></script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

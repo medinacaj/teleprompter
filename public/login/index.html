@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ingresar — Prompter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0a12">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<header class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="36" height="36">Prompter</a></div></header>
+
+<main class="center wrap">
+  <div class="panel reveal">
+    <span class="eyebrow">Tu cuenta</span>
+    <h1 id="heading">Ingresa a Prompter</h1>
+    <p class="sub" id="subheading">Usa tu correo y contraseña.</p>
+
+    <div class="tabs" role="tablist" id="tabs">
+      <button type="button" role="tab" id="tabLogin" aria-selected="true">Ingresar</button>
+      <button type="button" role="tab" id="tabSignup" aria-selected="false">Crear cuenta</button>
+    </div>
+
+    <form id="formLogin" novalidate>
+      <label class="f">Correo<input type="email" name="email" autocomplete="email" required></label>
+      <label class="f">Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
+      <p style="margin:14px 0 0;text-align:center"><button type="button" class="linkbtn" id="toRecover">¿Olvidaste tu contraseña?</button></p>
+    </form>
+
+    <form id="formSignup" hidden novalidate>
+      <label class="f">Correo<input type="email" name="email" autocomplete="email" required></label>
+      <label class="f">Contraseña (mínimo 10 caracteres)<input type="password" name="password" autocomplete="new-password" minlength="10" required></label>
+      <label class="check"><input type="checkbox" name="accept" required><span>Acepto los <a href="/legal/#terminos" target="_blank" rel="noopener">términos</a> y la <a href="/legal/#privacidad" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
+      <button class="btn btn-primary btn-block" type="submit">Crear cuenta</button>
+    </form>
+
+    <form id="formRecover" hidden novalidate>
+      <label class="f">Correo de tu cuenta<input type="email" name="email" autocomplete="email" required></label>
+      <button class="btn btn-primary btn-block" type="submit">Enviar enlace</button>
+      <p style="margin:14px 0 0;text-align:center"><button type="button" class="linkbtn" id="backLogin">Volver a ingresar</button></p>
+    </form>
+
+    <form id="formPassword" hidden novalidate>
+      <label class="f">Nueva contraseña (mínimo 10 caracteres)<input type="password" name="password" autocomplete="new-password" minlength="10" required></label>
+      <button class="btn btn-primary btn-block" type="submit">Guardar contraseña</button>
+    </form>
+
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </div>
+</main>
+
+<script src="/assets/site.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const next = (() => { const n = params.get('next') || ''; return /^\/(?![\/\\])/.test(n) && !n.startsWith('/api/') ? n : '/cuenta/'; })();
+  const forms = { login: $('formLogin'), signup: $('formSignup'), recover: $('formRecover'), password: $('formPassword') };
+  const copy = {
+    login: ['Ingresa a Prompter', 'Usa tu correo y contraseña.'],
+    signup: ['Crea tu cuenta', 'Después activas la suscripción de US$1 al mes.'],
+    recover: ['Recupera tu acceso', 'Te enviaremos un enlace para crear una contraseña nueva.'],
+    password: ['Nueva contraseña', 'Elige una contraseña que no uses en otros sitios.']
+  };
+  function show(mode) {
+    for (const [k, f] of Object.entries(forms)) f.hidden = k !== mode;
+    $('tabs').hidden = mode === 'recover' || mode === 'password';
+    $('tabLogin').setAttribute('aria-selected', String(mode === 'login'));
+    $('tabSignup').setAttribute('aria-selected', String(mode === 'signup'));
+    $('heading').textContent = copy[mode][0]; $('subheading').textContent = copy[mode][1];
+    msg('');
+    const first = forms[mode].querySelector('input'); if (first) first.focus();
+  }
+  function msg(text, ok) { const m = $('msg'); m.textContent = text; m.className = 'msg' + (text ? (ok ? ' ok' : ' err') : ''); }
+  function busy(form, on) { const b = form.querySelector('button[type=submit]'); b.disabled = on; }
+
+  $('tabLogin').addEventListener('click', () => show('login'));
+  $('tabSignup').addEventListener('click', () => show('signup'));
+  $('toRecover').addEventListener('click', () => show('recover'));
+  $('backLogin').addEventListener('click', () => show('login'));
+
+  forms.login.addEventListener('submit', async e => {
+    e.preventDefault(); busy(forms.login, true);
+    const f = new FormData(forms.login);
+    const r = await api('/api/auth/login', { email: f.get('email'), password: f.get('password') });
+    busy(forms.login, false);
+    if (r.ok) location.replace(next); else msg(r.data.error || 'No se pudo ingresar.');
+  });
+  forms.signup.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = new FormData(forms.signup);
+    if (!f.get('accept')) { msg('Debes aceptar los términos y la política de privacidad.'); return; }
+    if (String(f.get('password')).length < 10) { msg('La contraseña debe tener al menos 10 caracteres.'); return; }
+    busy(forms.signup, true);
+    const r = await api('/api/auth/signup', { email: f.get('email'), password: f.get('password'), accept: true });
+    busy(forms.signup, false);
+    if (!r.ok) { msg(r.data.error || 'No se pudo crear la cuenta.'); return; }
+    if (r.data.needsConfirmation) { show('login'); msg('Revisa tu correo y confirma la cuenta para ingresar.', true); }
+    else location.replace('/cuenta/');
+  });
+  forms.recover.addEventListener('submit', async e => {
+    e.preventDefault(); busy(forms.recover, true);
+    const r = await api('/api/auth/recover', { email: new FormData(forms.recover).get('email') });
+    busy(forms.recover, false);
+    msg(r.ok ? 'Si el correo está registrado, recibirás un enlace en unos minutos.' : (r.data.error || 'No se pudo enviar.'), r.ok);
+  });
+  forms.password.addEventListener('submit', async e => {
+    e.preventDefault(); busy(forms.password, true);
+    const r = await api('/api/auth/password', { password: new FormData(forms.password).get('password') });
+    busy(forms.password, false);
+    if (r.ok) { msg('Contraseña actualizada.', true); setTimeout(() => location.replace('/cuenta/'), 900); }
+    else msg(r.data.error || 'No se pudo guardar.');
+  });
+
+  /* Enlaces de confirmación o recuperación: Supabase entrega los tokens en el fragmento (#), que nunca llega al servidor.
+     Se envían una vez para guardarlos como cookies HttpOnly y se borran de la barra de direcciones. */
+  (async () => {
+    const hash = new URLSearchParams(location.hash.slice(1));
+    if (hash.get('error_description')) { history.replaceState(null, '', location.pathname); msg(hash.get('error_description')); return; }
+    const at = hash.get('access_token'), rt = hash.get('refresh_token');
+    if (!at || !rt) { show(params.get('modo') === 'registro' ? 'signup' : 'login'); return; }
+    history.replaceState(null, '', location.pathname + location.search);
+    const r = await api('/api/auth/session', { access_token: at, refresh_token: rt, expires_in: Number(hash.get('expires_in')) || 3600 });
+    if (!r.ok) { show('login'); msg(r.data.error || 'El enlace no es válido.'); return; }
+    if (hash.get('type') === 'recovery') show('password');
+    else location.replace('/cuenta/?bienvenida=1');
+  })();
+})();
+</script>
+</body>
+</html>

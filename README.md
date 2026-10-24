@@ -2,31 +2,36 @@
 
 Teleprompter web mobile-first en español: pega tu guion, fija la velocidad en palabras por minuto (ppm) y léelo frente a la cámara con cuenta atrás, línea guía y modo espejo.
 
-**En línea:** https://medinacaj.github.io/teleprompter/ (requiere GitHub Pages activo, ver abajo).
+Producto de suscripción (US$1/mes): sitio público, cuentas con Supabase, lector protegido en `/app/` y pagos con PayPal (preparados, aún desactivados). Arquitectura, seguridad y pasos de despliegue en [`docs/SUSCRIPCIONES.md`](docs/SUSCRIPCIONES.md).
 
-## Ejecutar
+## Ejecutar en local
 
-- **Local:** descarga `index.html` y ábrelo en el navegador. No necesita instalación ni servidor.
-- **GitHub Pages:** Settings → Pages → *Build and deployment* → Source: **Deploy from a branch** → rama `main`, carpeta `/ (root)` → Save.
+```sh
+node tests/local-server.mjs   # http://localhost:3000 — Supabase simulado, demostración activada
+```
 
-Fuera de claude.ai los guiones se guardan en el navegador (localStorage); usa **Mis guiones → Exportar** para respaldarlos. La app no usa cuentas, analítica ni fuentes o scripts de terceros.
+Los guiones se guardan en el navegador (localStorage); usa **Mis guiones → Exportar** para respaldarlos. La app no usa analítica ni fuentes o scripts de terceros.
 
 ## Pruebas
 
 ```sh
-node tests/smoke.cjs
+node tests/smoke.cjs && node --test tests/*.test.mjs
 ```
 
-GitHub Actions (`.github/workflows/quality.yml`) ejecuta la misma comprobación en cada push y PR. Al modificar `index.html`, incrementa la versión de caché en `sw.js` (`prompter-static-vN`) y en la prueba.
+GitHub Actions (`.github/workflows/quality.yml`) ejecuta la misma comprobación en cada push y PR. Al modificar `public/app/index.html`, incrementa la versión de caché en `public/app/sw.js` (`prompter-static-vN`) y en la prueba.
 
 ## Archivos
 
-| Archivo | Uso |
+| Ruta | Uso |
 |---|---|
-| `index.html` | La app completa (HTML + CSS + JS, sin dependencias) |
-| `sw.js`, `manifest.webmanifest`, `icon.svg` | Instalación como app (PWA) y uso sin conexión |
-| `tests/smoke.cjs` | Comprobaciones estáticas sin dependencias |
-| `docs/` | Validación, auditoría, revisión jurídico-tecnológica y flujo multi-IA |
-| `og-image.png` | Imagen para redes sociales (1200×630) |
-| `sitemap.xml`, `robots.txt` | Rastreo e indexación |
-| `.nojekyll` | Publica los archivos tal cual en Pages |
+| `public/` | Único directorio publicado como estático (`outputDirectory`) |
+| `public/index.html`, `public/assets/` | Página pública, estilos, logo y scripts compartidos |
+| `public/login/`, `public/cuenta/`, `public/legal/` | Acceso, estado de suscripción y borradores legales |
+| `public/app/` | Lector (HTML + CSS + JS sin dependencias), PWA y service worker |
+| `middleware.js`, `lib/gate.js` | Acceso a `/app/` solo para suscriptores activos |
+| `api/` | Funciones de Vercel: autenticación, estado, PayPal y demostración |
+| `lib/` | Clientes de Supabase y PayPal, cookies y reglas de suscripción |
+| `supabase/migrations/` | Tablas y políticas RLS |
+| `vercel.json` | Cabeceras de seguridad y caché |
+| `tests/` | Pruebas estáticas, unitarias del servidor y servidor local simulado |
+| `docs/` | Suscripciones, PayPal, auditoría, validación, revisión jurídico-tecnológica y flujo multi-IA |

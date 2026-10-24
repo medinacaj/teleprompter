@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mi cuenta — Prompter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0a12">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="" width="36" height="36">Prompter</a>
+  <nav class="nav-links"><button type="button" class="btn" id="btnLogout">Cerrar sesión</button></nav>
+</div></header>
+
+<main class="center wrap">
+  <div class="panel reveal" id="panel" aria-busy="true">
+    <span class="eyebrow">Mi cuenta</span>
+    <h1>Suscripción</h1>
+    <p class="sub" id="email">Cargando…</p>
+
+    <span class="badge wait" id="badge">Comprobando</span>
+    <div class="kv">
+      <div><span>Plan</span><b>Prompter mensual</b></div>
+      <div><span>Precio</span><b id="price">US$1,00 / mes</b></div>
+      <div><span>Estado</span><b id="statusText">—</b></div>
+      <div id="rowEnd" hidden><span id="endLabel">Próxima renovación</span><b id="endDate">—</b></div>
+    </div>
+
+    <div class="notice" id="notice" hidden></div>
+
+    <div class="stack">
+      <a class="btn btn-primary btn-lg btn-block" id="btnOpen" href="/app/" hidden>Abrir Prompter</a>
+      <button type="button" class="btn btn-lg btn-block paypal" id="btnPaypal" hidden>Suscribirme con PayPal · US$1/mes</button>
+      <button type="button" class="btn btn-block" id="btnDemo" hidden>Activar 7 días de demostración</button>
+    </div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <p style="margin:16px 0 0;color:var(--faint);font-size:.8rem">Los pagos se procesan en PayPal; Prompter no recibe ni guarda datos de tu tarjeta. Puedes cancelar desde tu cuenta de PayPal y conservarás el acceso hasta el fin del periodo pagado.</p>
+  </div>
+</main>
+
+<script src="/assets/site.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const LABEL = { active: 'Activa', trialing: 'Demostración', pending: 'Pago pendiente', past_due: 'Pago atrasado', suspended: 'Suspendida', canceled: 'Cancelada', expired: 'Vencida', none: 'Sin suscripción' };
+  const fmt = iso => { try { return new Date(iso).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' }); } catch (e) { return iso; } };
+  function msg(text, ok) { $('msg').textContent = text; $('msg').className = 'msg' + (text ? (ok ? ' ok' : ' err') : ''); }
+  function notice(text) { $('notice').hidden = !text; $('notice').textContent = text || ''; }
+
+  const q = new URLSearchParams(location.search);
+  const PAGO = { ok: ['¡Listo! Tu suscripción está activa.', true], pendiente: ['PayPal está procesando el pago. Actualiza en unos minutos.', true], cancelado: ['Cancelaste el pago en PayPal.', false], error: ['No pudimos verificar el pago. Si se cobró, se activará automáticamente.', false] };
+  if (PAGO[q.get('pago')]) msg(...PAGO[q.get('pago')]);
+  if (q.get('motivo') === 'suscripcion') notice('Necesitas una suscripción activa para abrir Prompter.');
+  if (q.get('bienvenida')) msg('Cuenta confirmada. ¡Bienvenido!', true);
+  if (q.toString()) history.replaceState(null, '', location.pathname);
+
+  async function load() {
+    const r = await api('/api/subscription/status', null, 'GET');
+    if (r.status === 401) { location.replace('/login/?next=%2Fcuenta%2F'); return; }
+    $('panel').setAttribute('aria-busy', 'false');
+    if (!r.ok) { $('email').textContent = ''; msg(r.data.error || 'No se pudo cargar tu cuenta.'); return; }
+    const s = r.data;
+    $('email').textContent = s.email;
+    $('statusText').textContent = LABEL[s.status] || s.status;
+    const badge = $('badge');
+    badge.className = 'badge ' + (s.active ? 'on' : (s.status === 'pending' ? 'wait' : 'off'));
+    badge.textContent = s.active ? 'Acceso activo' : 'Sin acceso';
+    $('rowEnd').hidden = !s.currentPeriodEnd;
+    if (s.currentPeriodEnd) {
+      $('endLabel').textContent = s.status === 'canceled' ? 'Acceso hasta' : (s.status === 'trialing' ? 'Demostración hasta' : 'Próxima renovación');
+      $('endDate').textContent = fmt(s.currentPeriodEnd);
+    }
+    $('btnOpen').hidden = !s.active;
+    if (s.active && q.get('motivo')) notice('');
+    const canPay = !s.active || s.provider === 'demo';
+    $('btnPaypal').hidden = !canPay;
+    $('btnPaypal').disabled = !s.billing.paypalReady;
+    if (canPay && !s.billing.paypalReady) {
+      $('btnPaypal').textContent = 'Pago con PayPal · próximamente';
+      if (!$('notice').textContent) notice('La integración de pago con PayPal está preparada y se habilitará pronto.');
+    }
+    $('btnDemo').hidden = !(s.billing.demoAvailable && !s.active);
+  }
+
+  $('btnPaypal').addEventListener('click', async () => {
+    $('btnPaypal').disabled = true; msg('Conectando con PayPal…', true);
+    const r = await api('/api/paypal/create-subscription', {});
+    if (r.ok && r.data.approvalUrl && /^https:\/\/www\.(sandbox\.)?paypal\.com\//.test(r.data.approvalUrl)) { location.assign(r.data.approvalUrl); return; }
+    $('btnPaypal').disabled = false; msg(r.data.error || 'No se pudo iniciar el pago.');
+  });
+  $('btnDemo').addEventListener('click', async () => {
+    $('btnDemo').disabled = true;
+    const r = await api('/api/billing/demo', {});
+    $('btnDemo').disabled = false;
+    if (r.ok) { msg('Demostración activada por 7 días.', true); load(); } else msg(r.data.error || 'No disponible.');
+  });
+  $('btnLogout').addEventListener('click', async () => {
+    await api('/api/auth/logout', {});
+    try { localStorage.removeItem('prompter:v2:verified'); } catch (e) { /* almacenamiento bloqueado */ }
+    location.replace('/');
+  });
+  load();
+})();
+</script>
+</body>
+</html>

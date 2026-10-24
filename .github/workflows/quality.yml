@@ -17,3 +17,5 @@ jobs:
           node-version: '22'
       - name: Validate app
         run: node tests/smoke.cjs
+      - name: Server unit tests
+        run: node --test tests/*.test.mjs
