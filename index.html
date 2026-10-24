@@ -149,7 +149,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .scroller{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:pointer}
 .scroller::-webkit-scrollbar{display:none}
 .paper{max-width:780px;margin:0 auto;padding-left:22px;padding-right:22px}
-.text{font-family:var(--serif);font-size:var(--fs);line-height:1.5;color:var(--text)}
+.text{font-family:var(--serif);font-size:var(--fs);line-height:var(--line-spacing,1.5);color:var(--text)}
 .reader.mirror .text{transform:scaleX(-1)}
 .reader.high-contrast .w{opacity:1;color:#fff}
 .reader.high-contrast .w.past{opacity:.55}
@@ -335,7 +335,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
         <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
         <button type="button" class="btn" id="btnBookmarkSave">Guardar marcador</button>
         <button type="button" class="btn" id="btnBookmarkGo">Ir al marcador</button>
-        <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
+        <div class="row"><span class="lbl">Interlineado</span><div class="stepper"><button type="button" class="step" id="lineDown" aria-label="Reducir interlineado">−</button><span class="val" id="lineVal">1.5</span><button type="button" class="step" id="lineUp" aria-label="Aumentar interlineado">+</button></div></div>
+       <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
       </div>
     </div>
     <div class="controls">
@@ -360,7 +361,7 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 /* Constantes */
 const FS = [24, 96, 4];          // tamaño de letra: mín, máx, paso
 const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
-const LH = 1.5;                  // interlineado del texto
+const LH = 1.5;                  // interlineado inicial del texto
 const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
 const MIN_DUR = 4;               // duración mínima de una lectura (s)
 const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session', K_BOOKMARKS = 'prompter:v2:bookmarks', K_STATS = 'prompter:v2:stats';
@@ -374,7 +375,7 @@ const ls = {
 /* Estado */
 const S = {
   title: '', text: '', words: 0,
-  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false },
+  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false, lineSpacing: LH },
   scripts: [], dels: [],
   view: 'setup',
   playing: false, finished: false, counting: false,
@@ -388,7 +389,7 @@ const el = {};
 ['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -423,6 +424,7 @@ function press(btn, fn) {
     if (typeof p.wpm === 'number') S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
     S.prefs.mirror = !!p.mirror;
     S.prefs.contrast = !!p.contrast;
+    if (Number.isFinite(p.lineSpacing)) S.prefs.lineSpacing = clamp(Math.round(p.lineSpacing * 10) / 10, 1.1, 2.1);
   }
   const d = ls.get(K_LIB);
   if (d && Array.isArray(d.scripts)) {
@@ -806,7 +808,7 @@ function layout() {
   const H = el.scroller.clientHeight;
   if (!H) return;
   const fs = S.prefs.fs;
-  R.lineH = fs * LH; R.guide = Math.round(H * GUIDE);
+  R.lineH = fs * S.prefs.lineSpacing; R.guide = Math.round(H * GUIDE);
   const st = el.reader.style;
   st.setProperty('--fs', fs + 'px'); st.setProperty('--lh', R.lineH + 'px'); st.setProperty('--guide', R.guide + 'px');
   el.paper.style.paddingTop = R.guide + 'px';
@@ -970,6 +972,16 @@ function closeReader() {
 function openPop() { el.pop.hidden = false; el.btnMore.setAttribute('aria-expanded', 'true'); }
 function closePop() { el.pop.hidden = true; el.btnMore.setAttribute('aria-expanded', 'false'); }
 el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePop(); });
+function setLineSpacing(v) {
+  S.prefs.lineSpacing = clamp(Math.round(v * 10) / 10, 1.1, 2.1);
+  el.lineVal.textContent = S.prefs.lineSpacing.toFixed(1);
+  el.reader.style.setProperty('--line-spacing', String(S.prefs.lineSpacing));
+  savePrefs();
+  if (S.view === 'reader') layout();
+}
+press(el.lineDown, () => setLineSpacing(S.prefs.lineSpacing - 0.1));
+press(el.lineUp, () => setLineSpacing(S.prefs.lineSpacing + 0.1));
+setLineSpacing(S.prefs.lineSpacing);
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
