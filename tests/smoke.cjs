@@ -99,3 +99,8 @@ console.log('OK: bounded bookmarks and reader settings layout');
 assert.match(html, /if \(!persistLib\(\)\) \{\s*if \(previous\) Object\.assign\(it, previous\)/);
 assert.match(html, /S\.scripts = S\.scripts\.filter\(it => it !== copy\)/);
 console.log('OK: rollback when script persistence fails');
+
+assert.match(html, /const snapshot = S\.scripts\.map\(it => \(\{ \.\.\.it \}\)\)/);
+assert.match(html, /if \(!stored\) \{ S\.scripts = snapshot/);
+assert.match(html, /const progress = saved\[bookmarkKey\(\)\]/);
+console.log('OK: import rollback and resilient bookmark reads');
