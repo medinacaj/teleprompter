@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v6/);
+assert.match(worker, /prompter-static-v7/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -156,7 +156,7 @@ for (const obsolete of ['class="studio-hero"', 'class="editor-panel"', 'class="s
 }
 console.log('OK: compact single-column setup, subtle amber accent and preserved reader design');
 
-assert.match(html, /id="speedRange"/);
+assert.match(html, /id="speedRange" class="speed-range"/);
 assert.match(html, /id="speedValue"/);
 assert.match(html, /min="60" max="300" step="5"/);
 assert.match(html, /for="speedRange">Velocidad/);
