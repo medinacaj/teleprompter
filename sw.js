@@ -1,5 +1,6 @@
-const CACHE = 'prompter-static-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+/* Solo se almacenan archivos públicos de la aplicación, nunca guiones. */
+const CACHE = 'prompter-static-v2';
+const ASSETS = ['./index.html', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
   self.skipWaiting();
@@ -11,13 +12,22 @@ self.addEventListener('activate', event => {
   ]));
 });
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
-  if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).then(response => {
-      if (response.ok) { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put('./index.html', copy)); }
-      return response;
-    }).catch(() => caches.match('./index.html')));
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).then(response => {
+        if (response.ok && response.type === 'basic') {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE).then(cache => cache.put('./index.html', copy)));
+        }
+        return response;
+      }).catch(async () => (await caches.match('./index.html')) || Response.error())
+    );
     return;
   }
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  if (!ASSETS.some(path => new URL(path, self.registration.scope).pathname === url.pathname)) return;
+  event.respondWith(caches.match(request, { ignoreSearch: true }).then(cached => cached || fetch(request)));
 });
