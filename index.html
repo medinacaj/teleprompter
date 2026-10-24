@@ -5,7 +5,9 @@
 <title>Prompter — Lector de guiones para grabar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía, modo espejo y guiones guardados.">
-<meta name="theme-color" content="#0a0a0b">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://medinacaj.github.io/teleprompter/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
@@ -22,37 +24,21 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://medinacaj.github.io/teleprompter/og-image.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Prompter — Lector de guiones","url":"https://medinacaj.github.io/teleprompter/","description":"Teleprompter web gratuito en español: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía y modo espejo.","applicationCategory":"MultimediaApplication","operatingSystem":"Cualquiera (navegador web)","inLanguage":"es-CL","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"CLP"}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Prompter — Lector de guiones","url":"https://medinacaj.github.io/teleprompter/","description":"Teleprompter web en español: pega tu guion, ajusta la velocidad y lee con cuenta atrás, línea guía y modo espejo.","applicationCategory":"MultimediaApplication","operatingSystem":"Cualquiera (navegador web)","inLanguage":"es-CL"}
 </script>
 <style>
 :root{
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --serif:Georgia,'Noto Serif','Times New Roman',serif;
-  --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-  color-scheme:light;
-  --bg:#f5f2ea; --panel:#ffffff; --panel2:#efe9dc; --line:#ddd5c4;
-  --text:#1c1a16; --muted:#6a655a; --faint:#8a8476;
-  --amber:#b45309; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-  --teal:#0f766e; --danger:#b91c1c;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --bg:#000000; --panel:#1d1d1f; --panel2:#303033; --line:#3b3b40;
+  --text:#f5f5f7; --muted:#b7b7c1; --faint:#9898a3;
+  --amber:#2997ff; --btn:#0071e3; --btn-h:#1687fa; --on-btn:#ffffff;
+  --teal:#2997ff; --danger:#ff8589;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-    --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-    --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-    --teal:#2dd4bf; --danger:#f87171;
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-  --teal:#2dd4bf; --danger:#f87171;
 }
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -127,9 +113,9 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .reader{
   position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
   color-scheme:dark;
-  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100; --teal:#2dd4bf;
+  --bg:#000000; --panel:#1d1d1f; --panel2:#303033; --line:#3b3b40;
+  --text:#f5f5f7; --muted:#b7b7c1; --faint:#9898a3;
+  --amber:#2997ff; --btn:#0071e3; --btn-h:#1687fa; --on-btn:#ffffff; --teal:#2997ff;
   --fs:44px; --lh:66px; --guide:200px;
   background:var(--bg);color:var(--text);
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
@@ -147,8 +133,11 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .scroller{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:pointer}
 .scroller::-webkit-scrollbar{display:none}
 .paper{max-width:780px;margin:0 auto;padding-left:22px;padding-right:22px}
-.text{font-family:var(--serif);font-size:var(--fs);line-height:1.5;color:var(--text)}
+.text{font-family:var(--reader-font,var(--serif));font-size:var(--fs);line-height:var(--line-spacing,1.5);color:var(--text)}
 .reader.mirror .text{transform:scaleX(-1)}
+.reader.high-contrast .w{opacity:1;color:#fff}
+.reader.high-contrast .w.past{opacity:.55}
+.reader.high-contrast .w.cur{color:#fde68a;text-decoration:underline;text-underline-offset:.12em}
 .ln{margin:0;overflow-wrap:anywhere}
 .ln.gap{height:.9em}
 .w{opacity:.8;transition:opacity .25s,color .25s}
@@ -192,6 +181,224 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   .reader.playing .tally{animation:none}
   .w{transition:none}
 }
+
+/* ===== Interfaz compacta inspirada en la distribución inicial =====
+   Una columna para escribir, ajustar y comenzar; acento ámbar discreto.
+   Las funciones nuevas del lector y su deslizador de velocidad se conservan. */
+:root{
+  --bg:#0a0a0b;--panel:#151517;--panel2:#1e1e21;--line:#2b2b30;
+  --text:#f2f1ed;--muted:#a9a9b3;--faint:#8a8a96;
+  --amber:#fbbf24;--btn:#f59e0b;--btn-h:#fbbf24;--on-btn:#1c1100;
+  --teal:#2dd4bf;--danger:#f87171;
+}
+body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+#setup.wrap{display:block;max-width:748px;margin:0 auto;padding:22px 18px 48px}
+#setup .setup-header{margin-bottom:24px}
+#setup .tag{font:600 .72rem/1.2 var(--mono);letter-spacing:.12em;color:var(--amber);gap:9px}
+#setup .dot{width:7px;height:7px;background:var(--amber)}
+#setup h1{margin:11px 0 3px;font-size:clamp(1.65rem,3vw,1.9rem);line-height:1.17;letter-spacing:-.028em;font-weight:650}
+#setup .sub{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
+#setup .setup-editor{padding:0;background:none;border:0}
+#setup .field{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:50px;font-size:1rem;color:var(--text)}
+#setup .field::placeholder{color:var(--faint)}
+#setup .field:focus{outline:2px solid rgba(251,191,36,.38);outline-offset:1px;border-color:var(--amber)}
+#setup textarea.field{display:block;min-height:300px;margin-top:12px;resize:vertical;line-height:1.55}
+#setup .setup-editor .meta{margin:8px 2px 0;text-align:right;font-size:.76rem;color:var(--faint)}
+#setup .setup-editor .meta:empty{display:none}
+#setup .setup-settings{margin-top:28px}
+#setup .setup-settings .card{padding:2px 16px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+#setup .setup-settings .row{padding:13px 0;min-height:68px;gap:14px;align-items:center}
+#setup .setup-settings .row+.row{border-top:1px solid var(--line)}
+#setup .setup-settings .lbl{font-size:.94rem;font-weight:500;letter-spacing:normal}
+#setup .setup-settings .hint{display:block;margin-top:3px;color:var(--faint);font-size:.77rem;line-height:1.43;max-width:36ch}
+#setup .stepper{display:flex;gap:9px;align-items:center;flex:none}
+#setup .step{width:42px;height:42px;display:grid;place-items:center;padding:0;border:1px solid #35353b;border-radius:12px;background:var(--panel2);color:var(--text);cursor:pointer}
+#setup .step:hover{background:#303035;border-color:#686873}
+#setup .val{font:500 .96rem var(--mono);min-width:3.4ch;text-align:center;color:var(--text)}
+#setup .switch{width:54px;height:32px;border-radius:18px;background:var(--panel2);border:1px solid #35353b}
+#setup .switch::after{width:24px;height:24px;background:#8c8c97}
+#setup .switch[aria-checked="true"]{background:#0f766e;border-color:#0f766e}
+#setup .switch[aria-checked="true"]::after{background:#fff;transform:translateX(22px)}
+#setup .actions{display:flex;align-items:center;justify-content:stretch;flex-wrap:wrap;gap:10px;margin-top:18px}
+#setup .actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border:1px solid #36363b;border-radius:14px;background:var(--panel);color:var(--text);font-size:.93rem;font-weight:500;flex:0 0 auto;cursor:pointer}
+#setup .actions .btn:hover:not(:disabled){border-color:#6b6b74;background:#232327}
+#setup .actions .btn:disabled{opacity:.43;cursor:not-allowed}
+#setup .actions .btn.primary{flex:1 1 190px;background:var(--btn);border-color:var(--btn);color:var(--on-btn);font-weight:650}
+#setup .actions .btn.primary:hover:not(:disabled){background:var(--btn-h);border-color:var(--btn-h)}
+#setup .actions .ic{width:21px;height:21px}
+#setup .flash{margin:12px 2px 0;color:var(--amber);font-size:.84rem;min-height:0}
+#setup .flash:empty{display:none}
+#setup .tips{margin:19px 2px 0;color:var(--faint);font-size:.76rem;line-height:1.55}
+#setup .setup-stats{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:6px}
+#setup .setup-stats .meta{margin:0;color:var(--faint);font-size:.75rem;min-height:0}
+#setup .setup-stats .meta:empty{display:none}
+#setup .setup-stats .btn{min-height:31px;padding:5px 11px;font-size:.74rem;border-radius:9px;background:transparent;border:1px solid var(--line)}
+@media(max-width:560px){
+  #setup.wrap{padding:22px 15px 40px}
+  #setup .setup-settings{margin-top:23px}
+  #setup .setup-settings .card{padding:2px 14px}
+  #setup .setup-settings .row{gap:8px;padding:14px 0}
+  #setup .setup-settings .hint{max-width:27ch}
+  #setup .stepper{gap:5px}
+  #setup .step{width:39px;height:39px}
+  #setup .actions{gap:9px}
+  #setup .actions .btn{flex:1 1 calc(50% - 6px);padding:0 10px;font-size:.87rem}
+  #setup .actions .btn.primary{flex:1 1 100%;order:3}
+}
+@media(prefers-reduced-motion:reduce){
+  #setup button,#setup .field{transition:none}
+}
+.modal{background:rgba(0,0,0,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.panel{max-width:700px;max-height:min(86dvh,840px);background:#1d1d1f;border:1px solid #44444a;border-radius:28px;padding-bottom:0;overflow:hidden}
+.panel-head{padding:17px 20px 12px 26px;border-bottom:1px solid #37373e}
+.panel-head h2{font-size:1.45rem;font-weight:600;letter-spacing:-.04em}
+.panel #libSearch,.panel #libSort{width:calc(100% - 40px);margin:14px 20px 0;min-height:47px;border-radius:999px;background:#101012}
+.panel #libSort{margin-top:9px;cursor:pointer}
+.panel .list{padding:18px 20px;gap:9px;align-content:start}
+.item{background:#29292c;border:1px solid #3a3a40;border-radius:19px;padding:8px 9px 8px 18px;min-height:70px}
+.item .open{padding:8px 4px}
+.item .name{color:#f5f5f7;font-size:.91rem;line-height:1.3}
+.item .info{color:#a0a0ac;margin-top:4px}
+.del{border-radius:13px;color:#b4b4bf}
+.del:hover{background:#353539}
+.lib-actions{padding:13px 20px;border-top:1px solid #37373e;gap:10px}
+.lib-actions .btn{background:#303035;min-height:45px}
+.lib-msg{color:#93c9ff}
+.note{border-color:#37373e;color:#a5a5b0}
+.reader{--bg:#000;--panel:#1d1d1f;--panel2:#303033;--line:#3b3b40;--text:#f5f5f7;--muted:#b7b7c1;--faint:#9898a3;--amber:#2997ff;--btn:#0071e3;--btn-h:#1687fa;--on-btn:#fff;--teal:#2997ff}
+.hud{
+  margin:0;gap:8px 15px;
+  padding:17px clamp(16px,3vw,36px) 12px;font-size:.7rem;letter-spacing:.01em;
+  background:rgba(29,29,31,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.status{letter-spacing:.075em}
+.tally{background:#777785}
+.reader.playing .tally{background:#2997ff}
+.bar{margin:0;background:#25252b;height:3px;border-radius:0}
+.bar i{background:#2997ff}
+.paper{max-width:950px;padding-left:clamp(19px,5vw,60px);padding-right:clamp(19px,5vw,60px)}
+.text{letter-spacing:-.016em}
+.w{opacity:.85}
+.w.past{opacity:.35}
+.w.cur{color:#f5f5f7}
+.w.cue.cur,.nt{color:#73b8ff}
+.reader.high-contrast .w.cur{color:#fff;text-decoration:underline;text-decoration-color:#2997ff}
+.band{background:rgba(41,151,255,.055);border-top:1px solid rgba(41,151,255,.32);border-bottom:1px solid rgba(41,151,255,.32)}
+.band::before{border-left-color:#2997ff}
+.band::after{border-right-color:#2997ff}
+.fade.top{background:linear-gradient(#000,transparent)}
+.fade.bot{background:linear-gradient(transparent,#000)}
+.count .ticks line,.count .cross{stroke:#333338}
+.count .ring{stroke:#2997ff}
+.count .digit{font-family:var(--sans);font-weight:600;letter-spacing:-.07em}
+.dock{padding:10px 14px 15px;background:transparent}
+.controls{max-width:535px;border-radius:999px;background:rgba(51,51,54,.9);border:1px solid #45454b;padding:7px 10px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ib{border-radius:50%;color:#c0c0ca}
+.ib:hover{color:#fff;background:#414147}
+.play{background:#0071e3;color:#fff;width:61px;height:61px}
+.play:hover{background:#1687fa;color:#fff}
+.pop{width:min(350px,calc(100vw - 28px));right:14px;bottom:calc(100% + 10px);max-height:min(70dvh,590px);overflow-y:auto;background:rgba(29,29,31,.97);border:1px solid #46464d;border-radius:25px;padding:7px 19px;box-shadow:none;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.pop .row{padding:14px 0}
+.pop .btn{border-radius:16px}
+.pop .field{border-radius:14px;max-width:170px}
+@media(max-width:560px){
+  .panel{max-height:91dvh;border-radius:25px 25px 0 0;border-bottom:0}
+  .panel-head h2{font-size:1.3rem}
+  .reader .hud{padding:11px 14px 10px;font-size:.64rem;gap:5px 10px}
+  .reader .hud .status{margin-left:auto}
+  .dock{padding:6px 10px 10px}
+  .controls{padding:5px 8px}
+  .play{height:57px;width:57px}
+}
+@media(prefers-reduced-motion:reduce){
+  button,.btn,.ib,.step,.field,.switch{transition:none}
+}
+
+/* Control de velocidad integrado: lectura sin botones ambiguos +/- */
+.reader .hud #rPpm{display:none}
+.reader .controls{max-width:660px;justify-content:space-between;gap:clamp(4px,1.8vw,15px);padding:7px 12px}
+.reader .controls>.ib:not(.play){width:43px;height:43px;flex:0 0 43px}
+.reader .controls>.play{flex:0 0 58px;width:58px;height:58px}
+.speed-control{min-width:0;flex:1 1 190px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:2px clamp(3px,1vw,10px)}
+.speed-head{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#c7c7d0;font-size:.7rem;line-height:1.1;font-weight:500}
+.speed-head output{color:#f5f5f7;font:600 .73rem/1.2 var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.speed-range{display:block;width:100%;height:30px;cursor:pointer;appearance:none;-webkit-appearance:none;background:transparent;margin:0;padding:0;border:0;touch-action:auto}
+.speed-range::-webkit-slider-runnable-track{height:5px;border-radius:999px;background:linear-gradient(to right,#2997ff 0%,#2997ff var(--speed-progress,33.33%),#64646e var(--speed-progress,33.33%),#64646e 100%)}
+.speed-range::-moz-range-track{height:5px;border-radius:999px;background:#64646e}
+.speed-range::-moz-range-progress{height:5px;border-radius:999px;background:#2997ff}
+.speed-range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;height:22px;width:22px;border:3px solid #2997ff;border-radius:50%;background:#fff;margin-top:-8.5px;box-shadow:none}
+.speed-range::-moz-range-thumb{height:17px;width:17px;border:3px solid #2997ff;border-radius:50%;background:#fff;box-shadow:none}
+.speed-range:focus-visible{outline:2px solid #2997ff;outline-offset:2px;border-radius:12px}
+@media(max-width:410px){
+  .reader .controls{gap:3px;padding:6px 8px}
+  .reader .controls>.ib:not(.play){width:39px;height:39px;flex-basis:39px}
+  .reader .controls>.play{width:54px;height:54px;flex-basis:54px}
+  .speed-control{padding:2px}
+  .speed-head{font-size:.65rem}
+  .speed-head output{font-size:.68rem}
+}
+
+
+/* Identidad visual discreta: claqueta y pequeños acentos cálidos. */
+#setup .setup-header{display:flex;align-items:center;gap:15px;margin-bottom:23px}
+#setup .brand-icon{
+  display:grid;place-items:center;flex:none;width:54px;height:54px;
+  border:1px solid rgba(251,191,36,.25);border-radius:17px;
+  background:linear-gradient(145deg,#29241a,#191a20);
+  font-size:1.68rem;line-height:1;
+}
+#setup .brand-content{min-width:0}
+#setup .brand-content h1{margin:6px 0 3px;font-size:clamp(1.47rem,3vw,1.85rem)}
+#setup .brand-content .tag{font-size:.66rem;color:#fbbf24}
+#setup .brand-content .sub{font-size:.88rem}
+#setup .setup-settings .card{
+  position:relative;overflow:hidden;
+  background:#17181c;border-color:#303138;
+}
+#setup .setup-settings .card::before{
+  content:"";display:block;height:2px;
+  background:linear-gradient(90deg,#fbbf24 0%,#38bdf8 48%,transparent 87%);
+  opacity:.68;
+}
+#setup .setup-settings .row{padding-block:12px}
+#setup .step{transition:background .16s,border-color .16s,color .16s}
+#setup .step:hover{background:#2e2a22;border-color:rgba(251,191,36,.48);color:#fcd34d}
+#setup .actions .btn.primary{box-shadow:0 5px 18px rgba(245,158,11,.14)}
+#setup .actions .btn:not(.primary):hover:not(:disabled){border-color:rgba(251,191,36,.4)}
+#setup .help-disclosure{
+  position:relative;z-index:8;flex:0 0 auto;margin-left:auto;align-self:center;
+}
+#setup .help-disclosure summary{
+  display:grid;place-items:center;width:42px;height:42px;padding:0;
+  border:1px solid #35353b;border-radius:13px;background:#1b1c20;
+  color:#bfc0ca;cursor:pointer;list-style:none;
+  transition:color .16s ease,border-color .16s ease,background .16s ease;
+}
+#setup .help-disclosure summary::-webkit-details-marker{display:none}
+#setup .help-disclosure summary::marker{content:""}
+#setup .help-disclosure summary .ic{width:20px;height:20px}
+#setup .help-disclosure summary:hover,
+#setup .help-disclosure[open] summary{color:#fbbf24;background:#24231e;border-color:rgba(251,191,36,.5)}
+#setup .help-disclosure summary:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
+#setup .help-disclosure .tips{
+  position:absolute;top:calc(100% + 9px);right:0;
+  width:min(330px,calc(100vw - 38px));max-width:none;
+  margin:0;padding:15px 17px;
+  color:#d2d2dc;font-size:.81rem;line-height:1.58;
+  border:1px solid #414148;border-radius:15px;
+  background:#202125;box-shadow:0 14px 35px rgba(0,0,0,.42);
+}
+@media(max-width:560px){
+  #setup .setup-header{gap:12px;margin-bottom:20px}
+  #setup .brand-icon{width:47px;height:47px;border-radius:14px;font-size:1.5rem}
+  #setup .brand-content h1{font-size:1.38rem}
+  #setup .brand-content .sub{font-size:.81rem}
+}
+@media(prefers-reduced-motion:reduce){
+  #setup .help-disclosure summary,#setup .help-disclosure summary::after{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -211,43 +418,55 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.9-2.5 2-2.5 4"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/></symbol>
   </defs>
 </svg>
 
 <!-- ============ CONFIGURACIÓN ============ -->
 <main id="setup" class="wrap">
-  <header>
-    <div class="tag"><span class="dot"></span>Prompter</div>
-    <h1>Lector de guiones</h1>
-    <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
-    <noscript><p class="sub">Prompter es un teleprompter web gratuito: pega tu guion, fija la velocidad en palabras por minuto (ppm) y léelo frente a la cámara con cuenta atrás, línea guía y modo espejo. Necesita JavaScript activado para funcionar.</p></noscript>
+  <header class="setup-header">
+    <span class="brand-icon" aria-hidden="true">🎬</span>
+    <div class="brand-content">
+      <div class="tag">PROMPTER</div>
+      <h1>Lector de guiones</h1>
+      <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
+      <noscript><p class="sub">Activa JavaScript para utilizar el teleprompter.</p></noscript>
+    </div>
+    <details class="help-disclosure">
+      <summary aria-label="Ayuda y atajos" title="Ayuda y atajos"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></summary>
+      <p class="tips" id="tips"></p>
+    </details>
   </header>
 
-  <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
-  <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
-  <p class="meta" id="meta"></p>
+  <section class="setup-editor" aria-label="Editor de guion">
+    <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
+    <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
+    <p class="meta" id="meta"></p>
+  </section>
 
-  <section class="card" aria-label="Ajustes de lectura">
-    <div class="row">
-      <div><span class="lbl">Tamaño de letra</span><span class="hint">Tamaño del texto durante la lectura</span></div>
-      <div class="stepper">
-        <button type="button" class="step" id="fsDown" aria-label="Reducir tamaño de letra"><svg class="ic"><use href="#i-minus"/></svg></button>
-        <span class="val" id="fsVal">44</span>
-        <button type="button" class="step" id="fsUp" aria-label="Aumentar tamaño de letra"><svg class="ic"><use href="#i-plus"/></svg></button>
+  <section class="setup-settings" aria-label="Ajustes de lectura">
+    <div class="card">
+      <div class="row">
+        <div><span class="lbl">Tamaño de letra</span><span class="hint">Tamaño del texto durante la lectura</span></div>
+        <div class="stepper">
+          <button type="button" class="step" id="fsDown" aria-label="Reducir tamaño de letra"><svg class="ic"><use href="#i-minus"/></svg></button>
+          <span class="val" id="fsVal">44</span>
+          <button type="button" class="step" id="fsUp" aria-label="Aumentar tamaño de letra"><svg class="ic"><use href="#i-plus"/></svg></button>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div><span class="lbl">Velocidad</span><span class="hint">En palabras por minuto (ppm)</span></div>
-      <div class="stepper">
-        <button type="button" class="step" id="wpmDown" aria-label="Reducir velocidad"><svg class="ic"><use href="#i-minus"/></svg></button>
-        <span class="val" id="wpmVal">140</span>
-        <button type="button" class="step" id="wpmUp" aria-label="Aumentar velocidad"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <div class="row">
+        <div><span class="lbl">Velocidad</span><span class="hint">En palabras por minuto (ppm)</span></div>
+        <div class="stepper">
+          <button type="button" class="step" id="wpmDown" aria-label="Reducir velocidad"><svg class="ic"><use href="#i-minus"/></svg></button>
+          <span class="val" id="wpmVal">140</span>
+          <button type="button" class="step" id="wpmUp" aria-label="Aumentar velocidad"><svg class="ic"><use href="#i-plus"/></svg></button>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div><span class="lbl" id="mirLbl">Modo espejo</span><span class="hint">Invierte el texto para teleprompters con vidrio. Si lees directo de la pantalla, déjalo apagado.</span></div>
-      <button type="button" class="switch" id="mirrorSw" role="switch" aria-checked="false" aria-labelledby="mirLbl"></button>
+      <div class="row">
+        <div><span class="lbl" id="mirLbl">Modo espejo</span><span class="hint">Invierte el texto para teleprompters con vidrio. Si lees directamente en pantalla, déjalo apagado.</span></div>
+        <button type="button" class="switch" id="mirrorSw" role="switch" aria-checked="false" aria-labelledby="mirLbl"></button>
+      </div>
     </div>
   </section>
 
@@ -257,7 +476,11 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
     <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
   </div>
   <p class="flash" id="flash" role="status"></p>
-  <p class="tips" id="tips"></p>
+
+  <div class="setup-stats">
+    <p class="meta" id="readingStats" aria-live="polite"></p>
+    <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
+  </div>
 </main>
 
 <!-- ============ BIBLIOTECA ============ -->
@@ -267,6 +490,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <h2 id="libTitle">Mis guiones</h2>
       <button type="button" class="ib" id="libClose" aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button>
     </div>
+    <input type="search" id="libSearch" class="field" placeholder="Buscar guiones…" aria-label="Buscar guiones" autocomplete="off">
+    <select id="libSort" class="field" aria-label="Ordenar guiones"><option value="recent">Más recientes</option><option value="oldest">Más antiguos</option><option value="name">Título A–Z</option></select>
     <div class="list" id="libList"></div>
     <div class="lib-actions">
       <button type="button" class="btn" id="btnExport" aria-label="Exportar todos los guiones (.json)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Exportar</button>
@@ -283,6 +508,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   <div class="hud">
     <span class="time" id="rTime">0:00 / 0:00</span>
     <span class="ppm" id="rPpm">140 ppm</span>
+    <span class="ppm" id="rWords" aria-label="Palabras estimadas leídas">0 palabras</span>
     <span class="status"><i class="tally"></i><span id="rStatus">Listo</span></span>
   </div>
   <div class="bar"><i id="rFill"></i></div>
@@ -320,15 +546,26 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
         <span class="lbl" id="popMirLbl">Modo espejo</span>
         <button type="button" class="switch" id="popMirror" role="switch" aria-checked="false" aria-labelledby="popMirLbl"></button>
       </div>
-      <div class="row" style="padding-bottom:0;border-top:1px solid var(--line)">
+      <div class="row" style="border-top:1px solid var(--line);flex-wrap:wrap">
         <button type="button" class="btn" id="btnRestart"><svg class="ic" aria-hidden="true"><use href="#i-replay"/></svg>Reiniciar lectura</button>
+        <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
+        <button type="button" class="btn" id="btnBookmarkSave">Guardar marcador</button>
+        <button type="button" class="btn" id="btnBookmarkGo">Ir al marcador</button>
       </div>
+      <div class="row"><span class="lbl">Tipo de letra</span><select id="readerFont" class="field" aria-label="Tipo de letra del lector"><option value="serif">Clásica</option><option value="sans">Moderna</option><option value="mono">Monoespaciada</option></select></div>
+      <div class="row"><span class="lbl">Interlineado</span><div class="stepper"><button type="button" class="step" id="lineDown" aria-label="Reducir interlineado">−</button><span class="val" id="lineVal">1.5</span><button type="button" class="step" id="lineUp" aria-label="Aumentar interlineado">+</button></div></div>
+      <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
     </div>
     <div class="controls">
       <button type="button" class="ib" id="btnExit" aria-label="Salir de la lectura"><svg class="ic"><use href="#i-back"/></svg></button>
-      <button type="button" class="ib" id="btnSlow" aria-label="Más lento"><svg class="ic"><use href="#i-minus"/></svg></button>
       <button type="button" class="ib play" id="btnPlay" aria-label="Reproducir"><svg class="ic"><use id="icPlay" href="#i-play"/></svg></button>
-      <button type="button" class="ib" id="btnFast" aria-label="Más rápido"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <div class="speed-control">
+        <div class="speed-head">
+          <label for="speedRange">Velocidad</label>
+          <output id="speedValue" for="speedRange">140 ppm</output>
+        </div>
+        <input type="range" id="speedRange" class="speed-range" min="60" max="300" step="5" value="140" aria-label="Velocidad de lectura en palabras por minuto">
+      </div>
       <button type="button" class="ib" id="btnMore" aria-label="Más ajustes" aria-expanded="false" aria-controls="pop"><svg class="ic"><use href="#i-sliders"/></svg></button>
     </div>
   </div>
@@ -346,10 +583,10 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 /* Constantes */
 const FS = [24, 96, 4];          // tamaño de letra: mín, máx, paso
 const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
-const LH = 1.5;                  // interlineado del texto
+const LH = 1.5;                  // interlineado inicial del texto
 const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
 const MIN_DUR = 4;               // duración mínima de una lectura (s)
-const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft';
+const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session', K_BOOKMARKS = 'prompter:v2:bookmarks', K_STATS = 'prompter:v2:stats';
 
 /* Almacenamiento local (con try/catch: puede estar bloqueado) */
 const ls = {
@@ -360,21 +597,21 @@ const ls = {
 /* Estado */
 const S = {
   title: '', text: '', words: 0,
-  prefs: { fs: 44, wpm: 140, mirror: false },
+  prefs: { fs: 44, wpm: 140, mirror: false, contrast: false, lineSpacing: LH, font: 'serif' },
   scripts: [], dels: [],
   view: 'setup',
   playing: false, finished: false, counting: false,
   p: 0,            // progreso 0..1 de la lectura
   elapsed: 0       // cronómetro real (s), solo avanza leyendo
 };
-const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '' };
+const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1, statsRecorded: false };
 const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
 
 const el = {};
-['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
- 'lib','libList','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
- 'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
+ 'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
+ 'count','digit','ticks','dock','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','readerFont','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -401,18 +638,25 @@ function press(btn, fn) {
   btn.addEventListener('click', e => { if (e.detail === 0) fn(); });
 }
 
+const MAX_SCRIPT_LENGTH = 200000;
 /* ================= Preferencias, biblioteca y borrador ================= */
 (function load() {
   const p = ls.get(K_PREFS);
   if (p) {
-    if (typeof p.fs === 'number') S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
-    if (typeof p.wpm === 'number') S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
+    if (Number.isFinite(p.fs)) S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
+    if (Number.isFinite(p.wpm)) S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
     S.prefs.mirror = !!p.mirror;
+    S.prefs.contrast = !!p.contrast;
+    if (Number.isFinite(p.lineSpacing)) S.prefs.lineSpacing = clamp(Math.round(p.lineSpacing * 10) / 10, 1.1, 2.1);
+    if (['serif','sans','mono'].includes(p.font)) S.prefs.font = p.font;
   }
   const d = ls.get(K_LIB);
   if (d && Array.isArray(d.scripts)) {
-    S.scripts = d.scripts.filter(x => x && typeof x.id === 'string' && typeof x.content === 'string')
-      .map(x => ({ id: x.id, name: String(x.name || 'Guion'), content: x.content, savedAt: Number(x.savedAt) || 0, pending: !!x.pending }));
+    const seenIds = new Set();
+    S.scripts = d.scripts.filter(x => x && typeof x.id === 'string' && x.id.length <= 100 &&
+      !seenIds.has(x.id) && typeof x.content === 'string' && x.content.length <= MAX_SCRIPT_LENGTH)
+      .map(x => { seenIds.add(x.id); return { id: x.id, name: String(x.name || 'Guion').slice(0, 80),
+        content: x.content, savedAt: Number.isFinite(x.savedAt) ? x.savedAt : 0, pending: !!x.pending }; });
   }
   if (d && Array.isArray(d.dels)) S.dels = d.dels.filter(x => typeof x === 'string').slice(0, 200);
   const dr = ls.get(K_DRAFT);
@@ -423,20 +667,32 @@ function press(btn, fn) {
 let prefT = 0, draftT = 0;
 function savePrefs() { clearTimeout(prefT); prefT = setTimeout(flushPrefs, 250); }
 function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
-function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => ls.set(K_DRAFT, { t: S.title, x: S.text }), 400); }
-function persistLib() { ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
+function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text }); }
+function saveDraft() { clearTimeout(draftT); draftT = setTimeout(flushDraft, 400); }
+function persistLib() { return ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
+function saveSession() {
+  if (S.view !== 'reader') return;
+  ls.set(K_SESSION, { title: S.title, text: S.text, p: S.p, elapsed: S.elapsed, savedAt: Date.now() });
+}
+function clearSession() { try { localStorage.removeItem(K_SESSION); } catch (e) { /* almacenamiento bloqueado */ } }
 
 /* ================= Configuración (pantalla inicial) ================= */
 function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
 function renderSetup() {
   const w = S.words, wpm = S.prefs.wpm;
   const nn = w ? countNotes(S.text) : 0;
-  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' + (nn ? ' · ' + nn + (nn === 1 ? ' indicación' : ' indicaciones') + ' sin contar' : '') : 'Pega o escribe tu guion para empezar.';
+  el.meta.textContent = w ? w + ' palabras · ≈ ' + fmt(duration()) + ' a ' + wpm + ' ppm' + (nn ? ' · ' + nn + (nn === 1 ? ' indicación' : ' indicaciones') + ' sin contar' : '') : '';
   el.fsVal.textContent = S.prefs.fs;
   el.popFsVal.textContent = S.prefs.fs;
   el.wpmVal.textContent = wpm;
+  el.speedRange.value = String(wpm);
+  el.speedValue.textContent = wpm + ' ppm';
+  el.speedRange.setAttribute('aria-valuetext', wpm + ' palabras por minuto');
+  el.speedRange.style.setProperty('--speed-progress', (((wpm - WPM[0]) / (WPM[1] - WPM[0])) * 100).toFixed(2) + '%');
   setSwitch(el.mirrorSw, S.prefs.mirror);
   setSwitch(el.popMirror, S.prefs.mirror);
+  setSwitch(el.readerContrast, S.prefs.contrast);
+  el.reader.classList.toggle('high-contrast', S.prefs.contrast);
   el.reader.classList.toggle('mirror', S.prefs.mirror);
   const has = !!S.text.trim();
   el.btnSave.disabled = !has;
@@ -466,10 +722,17 @@ press(el.wpmDown, () => setWpm(S.prefs.wpm - WPM[2]));
 press(el.wpmUp, () => setWpm(S.prefs.wpm + WPM[2]));
 el.mirrorSw.addEventListener('click', () => setMirror(!S.prefs.mirror));
 el.popMirror.addEventListener('click', () => setMirror(!S.prefs.mirror));
+el.readerContrast.addEventListener('click', () => { S.prefs.contrast = !S.prefs.contrast; savePrefs(); renderSetup(); });
 el.tips.textContent = matchMedia('(pointer:fine)').matches
-  ? 'Durante la lectura: toca el texto o pulsa Espacio para pausar · ↑ ↓ cambian la velocidad · Esc sale.'
+  ? 'Durante la lectura: Espacio pausa · ↑ ↓ velocidad · ← → avanza o retrocede 5 % · Inicio/Fin salta · Esc sale.'
   : 'Durante la lectura: toca el texto para pausar o reanudar.';
 el.tips.textContent += ' Escribe las indicaciones [entre corchetes]: se ven aparte y no suman tiempo.';
+
+// El panel de ayuda no ocupa una fila ni queda abierto al usar otro control.
+const helpPanel = $('.help-disclosure');
+document.addEventListener('pointerdown', e => {
+  if (helpPanel.open && !helpPanel.contains(e.target)) helpPanel.open = false;
+}, { passive: true });
 
 /* ================= Biblioteca de guiones ================= */
 async function permState() {
@@ -534,7 +797,15 @@ function renderLibrary() {
   if (!S.scripts.length) {
     const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'Aún no tienes guiones guardados.'; list.appendChild(p);
   }
-  for (const it of S.scripts) {
+  const term = el.libSearch.value.trim().toLocaleLowerCase('es');
+  const matches = S.scripts.filter(it => !term || (it.name + ' ' + it.content).toLocaleLowerCase('es').includes(term));
+  if (el.libSort.value === 'name') matches.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  else if (el.libSort.value === 'oldest') matches.sort((a, b) => a.savedAt - b.savedAt);
+  else matches.sort((a, b) => b.savedAt - a.savedAt);
+  if (S.scripts.length && !matches.length) {
+    const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No hay guiones que coincidan con la búsqueda.'; list.appendChild(p);
+  }
+  for (const it of matches) {
     const row = document.createElement('div'); row.className = 'item';
     const open = document.createElement('button'); open.type = 'button'; open.className = 'open';
     const n = document.createElement('span'); n.className = 'name'; n.textContent = it.name;
@@ -551,14 +822,37 @@ function renderLibrary() {
     const dl = document.createElement('button'); dl.type = 'button'; dl.className = 'ib'; dl.setAttribute('aria-label', 'Descargar «' + it.name + '» como .txt');
     dl.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>';
     dl.addEventListener('click', () => exportOne(it.id));
-    row.append(open, dl, del);
+    const dup = document.createElement('button'); dup.type = 'button'; dup.className = 'ib';
+    dup.setAttribute('aria-label', 'Duplicar guion «' + it.name + '»');
+    dup.textContent = '⧉';
+    dup.addEventListener('click', () => duplicateScript(it.id));
+    row.append(open, dup, dl, del);
     list.appendChild(row);
   }
   el.btnExport.disabled = !S.scripts.length;
   el.libNote.textContent = Cloud.synced ? 'Sincronizados con tu cuenta.' : 'Guardados en este dispositivo.';
 }
-function openLib() { el.lib.hidden = false; libMsg(''); renderLibrary(); el.libClose.focus(); syncCloud(); }
-function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
+function openLib() {
+  el.lib.hidden = false; el.libSearch.value = ''; libMsg(''); renderLibrary();
+  el.setup.setAttribute('inert', ''); el.reader.setAttribute('inert', '');
+  el.libSearch.focus(); syncCloud();
+}
+el.libSearch.addEventListener('input', renderLibrary);
+el.libSort.addEventListener('change', renderLibrary);
+function closeLib() {
+  el.lib.hidden = true;
+  el.setup.removeAttribute('inert'); el.reader.removeAttribute('inert');
+  el.btnLib.focus();
+}
+el.lib.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(el.lib.querySelectorAll('button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), a[href]'))
+    .filter(node => !node.closest('[hidden]'));
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
   S.title = it.name; S.text = it.content; S.words = countWords(S.text);
@@ -570,19 +864,61 @@ async function saveScript() {
   if (S.text.length > 200000) { flash('El guion es demasiado largo para guardarlo.'); return; }
   const name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
   const now = Date.now();
-  let it = S.scripts.find(s => s.name === name);
-  if (it) { it.content = S.text; it.savedAt = now; it.pending = true; }
-  else { it = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: S.text, savedAt: now, pending: true }; S.scripts.push(it); }
+  const existing = S.scripts.find(s => s.name === name);
+  const previous = existing ? { ...existing } : null;
+  const it = existing || { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: '', savedAt: now, pending: true };
+  it.content = S.text; it.savedAt = now; it.pending = true;
+  if (!existing) S.scripts.push(it);
+  if (!persistLib()) {
+    if (previous) Object.assign(it, previous);
+    else S.scripts = S.scripts.filter(s => s !== it);
+    renderSetup(); flash('No se pudo guardar. Exporta una copia de seguridad.'); return;
+  }
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  persistLib(); renderSetup(); flash('Guardado ✓');
+  renderSetup(); flash('Guardado ✓');
   if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
   else syncCloud();
 }
+async function duplicateScript(id) {
+  const original = S.scripts.find(it => it.id === id);
+  if (!original) return;
+  const base = original.name.slice(0, 65);
+  let name = (base + ' (copia)').slice(0, 80), n = 2;
+  while (S.scripts.some(it => it.name === name)) {
+    name = (base + ' (copia ' + n++ + ')').slice(0, 80);
+  }
+  const now = Date.now();
+  const copy = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: original.content, savedAt: now, pending: true };
+  S.scripts.unshift(copy);
+  if (!persistLib()) {
+    S.scripts = S.scripts.filter(it => it !== copy);
+    libMsg('No se pudo duplicar: almacenamiento no disponible.');
+    return;
+  }
+  renderSetup(); renderLibrary(); libMsg('Guion duplicado.');
+  if (Cloud.synced) { try { await pushItem(copy); } catch (e) { /* pendiente */ } }
+  else syncCloud();
+}
 async function deleteScript(id) {
+  if (!S.scripts.some(s => s.id === id)) return;
+  const previous = S.scripts;
+  const previousDels = S.dels;
+  // La eliminación y su marca de sincronización se guardan juntas: nunca se
+  // elimina localmente un guion remoto sin registrar cómo borrarlo en la nube.
   S.scripts = S.scripts.filter(s => s.id !== id);
-  persistLib(); renderSetup(); renderLibrary();
-  if (Cloud.synced) { try { await Cloud.coll.doc(id).delete(); return; } catch (e) { /* se reintenta luego */ } }
-  if (Cloud.avail !== false && !S.dels.includes(id)) { S.dels.push(id); persistLib(); }
+  S.dels = Cloud.avail !== false && !S.dels.includes(id) ? [...S.dels, id] : S.dels;
+  if (!persistLib()) {
+    S.scripts = previous; S.dels = previousDels;
+    libMsg('No se pudo eliminar: almacenamiento no disponible.'); return;
+  }
+  renderSetup(); renderLibrary();
+  if (Cloud.synced && Cloud.coll) {
+    try {
+      await Cloud.coll.doc(id).delete();
+      S.dels = S.dels.filter(x => x !== id);
+      if (!persistLib()) libMsg('Eliminado en la nube; no se pudo actualizar el registro local.');
+    } catch (e) { libMsg('Eliminado en este dispositivo. Se sincronizará después.'); }
+  }
 }
 el.btnSave.addEventListener('click', saveScript);
 el.btnLib.addEventListener('click', openLib);
@@ -653,6 +989,7 @@ async function importFile(file) {
   try { items = parseImport(file.name || '', await file.text()); }
   catch (e) { libMsg(e && e.message ? e.message : 'No se pudo leer el archivo.'); return; }
   let added = 0, updated = 0, skipped = 0;
+  const snapshot = S.scripts.map(it => ({ ...it }));
   const touched = [];
   for (const x of items) {
     if (!x.content.trim() || x.content.length > MAX_LEN) { skipped++; continue; }
@@ -667,7 +1004,8 @@ async function importFile(file) {
     }
   }
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  persistLib(); renderSetup(); renderLibrary();
+  const stored = persistLib(); renderSetup(); renderLibrary();
+  if (!stored) { S.scripts = snapshot; renderSetup(); renderLibrary(); libMsg('No se pudo guardar la importación. Libera espacio o exporta una copia.'); return; }
   const parts = [];
   if (added) parts.push(added + (added === 1 ? ' nuevo' : ' nuevos'));
   if (updated) parts.push(updated + (updated === 1 ? ' actualizado' : ' actualizados'));
@@ -745,7 +1083,7 @@ function layout() {
   const H = el.scroller.clientHeight;
   if (!H) return;
   const fs = S.prefs.fs;
-  R.lineH = fs * LH; R.guide = Math.round(H * GUIDE);
+  R.lineH = fs * S.prefs.lineSpacing; R.guide = Math.round(H * GUIDE);
   const st = el.reader.style;
   st.setProperty('--fs', fs + 'px'); st.setProperty('--lh', R.lineH + 'px'); st.setProperty('--guide', R.guide + 'px');
   el.paper.style.paddingTop = R.guide + 'px';
@@ -778,6 +1116,7 @@ function updateHud() {
   if (a !== R.tA || b !== R.tB) { el.rTime.textContent = a + ' / ' + b; R.tA = a; R.tB = b; }
   el.rFill.style.transform = 'scaleX(' + S.p.toFixed(4) + ')';
   el.rPpm.textContent = S.prefs.wpm + ' ppm';
+  el.rWords.textContent = Math.round(S.words * S.p) + ' / ' + S.words + ' palabras';
 }
 function updateStatus() {
   let t = 'Listo';
@@ -793,7 +1132,9 @@ function frame(ts) {
   if (!S.playing) return;
   if (R.last == null) R.last = ts;
   let dt = (ts - R.last) / 1000; R.last = ts;
-  if (dt < 0) dt = 0; if (dt > 0.1) dt = 0.1;
+  if (!Number.isFinite(dt) || dt < 0) dt = 0;
+  // Evita saltos excesivos tras interrupciones, sin ralentizar la lectura a 10 fps.
+  if (dt > 0.25) dt = 0.25;
   const max = maxScroll();
   const st = el.scroller.scrollTop;
   if (max > 2 && Math.abs(st - R.lastSet) > 2) S.p = clamp(st / max, 0, 1);   // el usuario movió el texto
@@ -804,6 +1145,7 @@ function frame(ts) {
   updateActive(pos);
   updateHud();
   if (S.p >= 1) { finish(); return; }
+  if (Math.floor(S.elapsed) % 5 === 0 && Math.floor(S.elapsed) !== R.sessionTick) { R.sessionTick = Math.floor(S.elapsed); saveSession(); }
   R.raf = requestAnimationFrame(frame);
 }
 function play() {
@@ -817,9 +1159,46 @@ function pause() {
   if (R.raf) { cancelAnimationFrame(R.raf); R.raf = 0; }
   updateStatus();
 }
-function finish() { pause(); S.finished = true; S.p = 1; updateStatus(); updateHud(); }
+/* Estadísticas locales, sin identificar usuarios ni enviar información al servidor. */
+function recordReading(completed) {
+  if (S.elapsed < 2 || R.statsRecorded) return;
+  R.statsRecorded = true;
+  const stored = ls.get(K_STATS);
+  const stats = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : { sessions: 0, completed: 0, seconds: 0 };
+  stats.sessions = Math.max(0, Number(stats.sessions) || 0) + 1;
+  stats.completed = Math.max(0, Number(stats.completed) || 0) + (completed ? 1 : 0);
+  stats.seconds = Math.max(0, Number(stats.seconds) || 0) + Math.round(S.elapsed);
+  if (ls.set(K_STATS, stats)) renderStats();
+}
+el.btnResetStats.addEventListener('click', () => {
+  if (!window.confirm('¿Eliminar todas las estadísticas de lectura guardadas en este dispositivo?')) return;
+  try { localStorage.removeItem(K_STATS); } catch (e) { flash('No se pudieron eliminar las estadísticas.'); return; }
+  renderStats(); flash('Estadísticas eliminadas.');
+});
+function renderStats() {
+  const stored = ls.get(K_STATS);
+  const st = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : null;
+  el.btnResetStats.hidden = !(st && Number.isFinite(st.sessions) && st.sessions > 0);
+  el.readingStats.textContent = st && st.sessions ?
+    'Actividad en este dispositivo: ' + st.sessions + ' sesiones · ' + (st.completed || 0) + ' completas · ' + fmt(st.seconds || 0) + ' de lectura' : '';
+}
+function finish() {
+  pause(); S.finished = true; S.p = 1; clearSession();
+  recordReading(true); updateStatus(); updateHud();
+}
 function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
+function seekReader(progress) {
+  if (S.view !== 'reader') return;
+  pause(); if (S.counting) endCountdown(false);
+  S.p = clamp(progress, 0, 0.999);
+  S.finished = false;
+  const pos = S.p * maxScroll();
+  el.scroller.scrollTop = pos; R.lastSet = pos;
+  updateActive(pos, true); updateHud(); updateStatus(); saveSession();
+}
 function restart() {
+  if (!S.finished) recordReading(false);
+  R.statsRecorded = false;
   pause(); S.p = 0; S.elapsed = 0; S.finished = false;
   const v = 0; el.scroller.scrollTop = v; R.lastSet = v;
   updateActive(0, true); updateHud(); startCountdown();
@@ -846,7 +1225,8 @@ function endCountdown(start) {
 
 function openReader() {
   if (!S.text.trim()) return;
-  R.sy = window.scrollY;
+  clearSession();
+  R.sy = window.scrollY; R.statsRecorded = false;
   S.view = 'reader'; S.words = countWords(S.text);
   el.setup.hidden = true; el.reader.hidden = false;
   buildText();
@@ -857,9 +1237,12 @@ function openReader() {
   updateHud(); startCountdown(); lockScreen();
 }
 function closeReader() {
-  pause(); endCountdown(false); closePop(); unlockScreen();
+  pause(); endCountdown(false); closePop(); unlockScreen(); clearSession();
+  if (document.fullscreenElement === el.reader) document.exitFullscreen().catch(() => {});
+  recordReading(false);
   S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
   renderSetup();
+  el.btnStart.focus({ preventScroll: true });
   requestAnimationFrame(() => window.scrollTo(0, R.sy));
 }
 
@@ -867,11 +1250,72 @@ function closeReader() {
 function openPop() { el.pop.hidden = false; el.btnMore.setAttribute('aria-expanded', 'true'); }
 function closePop() { el.pop.hidden = true; el.btnMore.setAttribute('aria-expanded', 'false'); }
 el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePop(); });
+function setLineSpacing(v) {
+  S.prefs.lineSpacing = clamp(Math.round(v * 10) / 10, 1.1, 2.1);
+  el.lineVal.textContent = S.prefs.lineSpacing.toFixed(1);
+  el.reader.style.setProperty('--line-spacing', String(S.prefs.lineSpacing));
+  savePrefs();
+  if (S.view === 'reader') layout();
+}
+press(el.lineDown, () => setLineSpacing(S.prefs.lineSpacing - 0.1));
+press(el.lineUp, () => setLineSpacing(S.prefs.lineSpacing + 0.1));
+setLineSpacing(S.prefs.lineSpacing);
+const readerFonts = { serif: 'var(--serif)', sans: 'var(--sans)', mono: 'var(--mono)' };
+function setReaderFont(font) {
+  if (!Object.prototype.hasOwnProperty.call(readerFonts, font)) return;
+  S.prefs.font = font;
+  el.readerFont.value = font;
+  el.reader.style.setProperty('--reader-font', readerFonts[font]);
+  savePrefs();
+  if (S.view === 'reader') layout();
+}
+el.readerFont.addEventListener('change', () => setReaderFont(el.readerFont.value));
+setReaderFont(S.prefs.font);
+
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
-press(el.btnSlow, () => setWpm(S.prefs.wpm - WPM[2]));
-press(el.btnFast, () => setWpm(S.prefs.wpm + WPM[2]));
+/* Huella compacta: evita guardar el texto completo como clave en localStorage. */
+const bookmarkKey = () => {
+  const input = S.title + '\\n' + S.text;
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) { h ^= input.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(36) + ':' + input.length;
+};
+el.btnBookmarkSave.addEventListener('click', () => {
+  const key = bookmarkKey(), stored = ls.get(K_BOOKMARKS);
+  const saved = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+  delete saved[key];
+  saved[key] = clamp(S.p, 0, 1);
+  const keys = Object.keys(saved);
+  for (const stale of keys.slice(0, Math.max(0, keys.length - 100))) delete saved[stale];
+  if (!ls.set(K_BOOKMARKS, saved)) { flash('No se pudo guardar el marcador.'); return; }
+  closePop(); flash('Marcador guardado.');
+});
+el.btnBookmarkGo.addEventListener('click', () => {
+  const stored = ls.get(K_BOOKMARKS);
+  const saved = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+  const progress = saved[bookmarkKey()];
+  if (!Number.isFinite(progress)) { closePop(); flash('Este guion no tiene marcador.'); return; }
+  pause(); endCountdown(false);
+  S.p = clamp(progress, 0, 1); S.finished = false;
+  const pos = S.p * maxScroll(); el.scroller.scrollTop = pos; R.lastSet = pos;
+  updateActive(pos, true); updateHud(); updateStatus(); saveSession(); closePop();
+});
+el.btnFullscreen.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else if (el.reader.requestFullscreen) await el.reader.requestFullscreen();
+    else { flash('Pantalla completa no disponible en este navegador.'); return; }
+    closePop();
+  } catch (e) { flash('No se pudo activar pantalla completa.'); }
+});
+document.addEventListener('fullscreenchange', () => {
+  el.btnFullscreen.textContent = document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa';
+  if (S.view === 'reader') requestAnimationFrame(layout);
+});
+// El control de velocidad funciona en tiempo real y conserva el ajuste.
+el.speedRange.addEventListener('input', () => setWpm(Number(el.speedRange.value)));
 el.btnPlay.addEventListener('click', toggle);
 el.btnExit.addEventListener('click', closeReader);
 el.count.addEventListener('click', () => endCountdown(true));
@@ -884,10 +1328,17 @@ document.addEventListener('pointerdown', e => {
 
 /* Toque en el texto: pausa/reanuda. Arrastrar o usar la rueda pausa y reposiciona */
 el.scroller.addEventListener('click', () => { if (Date.now() < R.swallow) return; toggle(); });
-el.scroller.addEventListener('wheel', () => { if (S.playing) pause(); }, { passive: true });
-let touchY = 0;
-el.scroller.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
-el.scroller.addEventListener('touchmove', e => { if (S.playing && Math.abs(e.touches[0].clientY - touchY) > 12) pause(); }, { passive: true });
+el.scroller.addEventListener('wheel', () => { R.swallow = Date.now() + 400; if (S.playing) pause(); }, { passive: true });
+let touchY = 0, touchMoved = false;
+el.scroller.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; touchMoved = false; }, { passive: true });
+el.scroller.addEventListener('touchmove', e => {
+  if (Math.abs(e.touches[0].clientY - touchY) > 12) {
+    touchMoved = true;
+    R.swallow = Date.now() + 500;
+    if (S.playing) pause();
+  }
+}, { passive: true });
+el.scroller.addEventListener('touchend', () => { if (touchMoved) R.swallow = Date.now() + 500; }, { passive: true });
 el.scroller.addEventListener('scroll', () => {
   if (S.playing || S.counting) return;
   const st = el.scroller.scrollTop;
@@ -900,19 +1351,40 @@ el.scroller.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('keydown', e => {
-  if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
-  if (e.key === 'Escape') { if (!el.pop.hidden) closePop(); else closeReader(); return; }
-  const onBtn = e.target && e.target.closest && e.target.closest('button');
-  if ((e.code === 'Space' || e.key === ' ' || e.key === 'Enter') && !onBtn) { e.preventDefault(); toggle(); }
+  if (S.view === 'setup') {
+    if (e.key === 'Escape' && !el.lib.hidden) { closeLib(); e.preventDefault(); }
+    else if (e.key === 'Escape' && helpPanel.open) {
+      helpPanel.open = false;
+      helpPanel.querySelector('summary').focus();
+      e.preventDefault();
+    }
+    return;
+  }
+  // No interceptar atajos mientras se utiliza un control interactivo.
+  const target = e.target;
+  const interactive = target && target.closest &&
+    target.closest('input, textarea, select, button, a, [contenteditable=""], [contenteditable="true"], [role="textbox"]');
+  if (e.key === 'Escape') {
+    if (!el.pop.hidden) { closePop(); el.btnMore.focus(); e.preventDefault(); }
+    else if (document.fullscreenElement === el.reader) { /* El navegador gestiona Escape para salir de pantalla completa. */ }
+    else if (!interactive) { closeReader(); e.preventDefault(); }
+    return;
+  }
+  if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing || interactive) return;
+  if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); setWpm(S.prefs.wpm + WPM[2]); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); setWpm(S.prefs.wpm - WPM[2]); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); seekReader(S.p - 0.05); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); seekReader(S.p + 0.05); }
+  else if (e.key === 'Home') { e.preventDefault(); seekReader(0); }
+  else if (e.key === 'End') { e.preventDefault(); seekReader(0.999); }
 });
 window.addEventListener('resize', () => { if (S.view === 'reader') { cancelAnimationFrame(R.rz); R.rz = requestAnimationFrame(layout); } });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (S.playing) pause(); flushPrefs(); }
+  if (document.hidden) { if (S.playing) pause(); if (S.counting) endCountdown(false); saveSession(); flushPrefs(); flushDraft(); }
   else if (S.view === 'reader') lockScreen();
 });
-window.addEventListener('pagehide', flushPrefs);
+window.addEventListener('pagehide', () => { saveSession(); flushPrefs(); flushDraft(); });
 
 /* Mantiene la pantalla encendida mientras lees */
 async function lockScreen() {
@@ -920,8 +1392,32 @@ async function lockScreen() {
 }
 function unlockScreen() { try { if (R.wake) R.wake.release(); } catch (e) { /* nada */ } R.wake = null; }
 
+/* Recuperación voluntaria: no iniciar reproducción automáticamente tras un cierre. */
+const previousSession = ls.get(K_SESSION);
+if (previousSession && typeof previousSession.text === 'string' && previousSession.text.trim() &&
+    previousSession.text === S.text && Number.isFinite(previousSession.p) &&
+    previousSession.p > 0.01 && previousSession.p < 1 &&
+    Number.isFinite(previousSession.savedAt) && previousSession.savedAt <= Date.now() &&
+    Date.now() - previousSession.savedAt < 7 * 86400000) {
+  if (window.confirm('Hay una lectura interrumpida. ¿Quieres recuperar su posición?')) {
+    openReader();
+    endCountdown(false);
+    S.p = clamp(previousSession.p, 0, 0.999);
+    S.elapsed = Math.max(0, Number(previousSession.elapsed) || 0);
+    layout();
+    const restoredPos = S.p * maxScroll();
+    el.scroller.scrollTop = restoredPos; R.lastSet = restoredPos;
+    updateActive(restoredPos, true); updateHud(); updateStatus();
+    saveSession();
+  } else clearSession();
+}
+/* Modo sin conexión: solo recursos estáticos del mismo origen. */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* lectura en línea disponible */ }));
+}
 /* Inicio */
 renderSetup();
+renderStats();
 renderLibrary();
 permState().then(st => {
   if (st === 'granted') syncCloud();
