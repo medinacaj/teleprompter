@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía, modo espejo y guiones guardados.">
 <meta name="theme-color" content="#0a0a0b">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://medinacaj.github.io/teleprompter/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
@@ -221,7 +223,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
     <div class="tag"><span class="dot"></span>Prompter</div>
     <h1>Lector de guiones</h1>
     <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
-    <noscript><p class="sub">Prompter es un teleprompter web gratuito: pega tu guion, fija la velocidad en palabras por minuto (ppm) y léelo frente a la cámara con cuenta atrás, línea guía y modo espejo. Necesita JavaScript activado para funcionar.</p></noscript>
+    <noscript><p class="sub">Prompter es un teleprompter web: pega tu guion, fija la velocidad en palabras por minuto (ppm) y léelo frente a la cámara con cuenta atrás, línea guía y modo espejo. Necesita JavaScript activado para funcionar.</p></noscript>
   </header>
 
   <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
@@ -267,6 +269,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <h2 id="libTitle">Mis guiones</h2>
       <button type="button" class="ib" id="libClose" aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button>
     </div>
+    <input type="search" id="libSearch" class="field" placeholder="Buscar guiones…" aria-label="Buscar guiones" autocomplete="off">
     <div class="list" id="libList"></div>
     <div class="lib-actions">
       <button type="button" class="btn" id="btnExport" aria-label="Exportar todos los guiones (.json)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Exportar</button>
@@ -372,7 +375,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 
 const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
- 'lib','libList','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
+ 'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
