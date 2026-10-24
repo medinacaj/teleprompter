@@ -10,6 +10,9 @@
 | P3 | Un `savedAt` futuro en un JSON importado fijaba el guion arriba y bloqueaba sus actualizaciones posteriores. | `parseImport` aceptaba cualquier número. | `validSavedAt` limita la fecha a un valor > 0 y ≤ ahora. |
 | P3 | Los guiones remotos no se acotaban como los locales (nombre de 80 caracteres como máximo, contenido de 200 000 como máximo). | `syncCloud`. | Se aplican los mismos límites. |
 | P3 | Si el borrador no cabía en `localStorage`, el fallo pasaba en silencio. | `saveDraft` ignoraba el resultado. | Se avisa una vez hasta que vuelva a guardarse. |
+| P2 | Al cargar un guion desde la biblioteca se reemplazaba el editor sin aviso y se perdían los cambios no guardados (pendiente del PR #5). | `loadScript` sobrescribía `S.text`. | Ahora pide confirmación si el editor tiene un texto que no coincide con ningún guion guardado. |
+| P2 | Guardar con un título existente sobrescribía en silencio otro guion (pendiente del PR #5). | `saveScript` buscaba por nombre. | Se registra qué guion está abierto (`loadedId`, persistido con el borrador). Si el título coincide con otro guion, se pide confirmación; al cancelar, se guarda como «Título (2)». |
+| P3 | Un `.txt` que empezaba con una indicación (`[pausa] …`) fallaba con «El archivo .json no es válido» (pendiente del PR #5). | `parseImport` decidía el formato por el primer carácter. | `.txt` siempre es texto. `.json` siempre es JSON. Sin extensión, solo se trata como JSON si el contenido es JSON válido. |
 | P3 | Había metadatos desactualizados: `sitemap.xml` (lastmod 2026-10-03) y una descripción del manifiesto que no coincidía con el nombre. | — | Se actualizaron; la caché del SW pasa a v11. |
 
 ## Pendientes (no implementados)
@@ -25,4 +28,5 @@
 ## Pruebas ejecutadas
 - `node tests/smoke.cjs`: todas OK.
 - Chromium (Playwright, 390×800): aviso del marcador visible en lectura, 0 errores JS, 0 solicitudes externas, fecha de importación futura normalizada.
+- Chromium: importación de `.txt` con `[pausa]` inicial; confirmación por título repetido, y al cancelar se guarda como «Demo (2)»; editar el guion abierto no pregunta; al cargar con cambios sin guardar, cancelar conserva el borrador y aceptar lo reemplaza.
 - **No ejecutado:** Safari iOS, Chrome Android, sincronización en claude.ai, auditoría legal.

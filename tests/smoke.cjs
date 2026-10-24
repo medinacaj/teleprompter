@@ -202,3 +202,11 @@ assert.match(html, /No se pudo guardar el borrador/);
 assert.ok(!html.includes('S.text.length > 200000'), 'Use MAX_SCRIPT_LENGTH');
 assert.match(fs.readFileSync('sitemap.xml', 'utf8'), /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
 console.log('OK: visible reader notices, no third-party fonts, bounded imports and draft warnings');
+
+assert.match(html, /const hasUnsavedText = \(\) =>/);
+assert.match(html, /El editor tiene cambios sin guardar/);
+assert.match(html, /existing\.id !== S\.loadedId/);
+assert.match(html, /function uniqueName\(base\)/);
+assert.match(html, /id: S\.loadedId \}/);
+assert.match(html, /isJson = ext === 'json'/);
+console.log('OK: unsaved-editor guard, title collision prompt and .txt imports starting with [cues]');

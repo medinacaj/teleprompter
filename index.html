@@ -601,6 +601,7 @@ const ls = {
 /* Estado */
 const S = {
   title: '', text: '', words: 0,
+  loadedId: '',    // guion de la biblioteca abierto en el editor (para sobrescribirlo sin preguntar)
   prefs: { fs: 44, wpm: 140, mirror: false, contrast: false, lineSpacing: LH, font: 'serif' },
   scripts: [], dels: [],
   view: 'setup',
@@ -669,14 +670,14 @@ const MAX_SCRIPT_LENGTH = 200000;
   }
   if (d && Array.isArray(d.dels)) S.dels = d.dels.filter(x => typeof x === 'string').slice(0, 200);
   const dr = ls.get(K_DRAFT);
-  if (dr && typeof dr.x === 'string') { S.text = dr.x; S.title = typeof dr.t === 'string' ? dr.t : ''; }
+  if (dr && typeof dr.x === 'string') { S.text = dr.x; S.title = typeof dr.t === 'string' ? dr.t : ''; S.loadedId = typeof dr.id === 'string' ? dr.id : ''; }
   S.words = countWords(S.text);
 })();
 
 let prefT = 0, draftT = 0;
 function savePrefs() { clearTimeout(prefT); prefT = setTimeout(flushPrefs, 250); }
 function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
-function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text }); }
+function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text, id: S.loadedId }); }
 function saveDraft() {
   clearTimeout(draftT);
   draftT = setTimeout(() => {
@@ -869,8 +870,18 @@ el.lib.addEventListener('keydown', e => {
   if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 });
+/* Texto del editor que no coincide con ningún guion guardado. */
+const hasUnsavedText = () => !!S.text.trim() && !S.scripts.some(s => s.content === S.text);
+function uniqueName(base) {
+  let name = base, n = 2;
+  while (S.scripts.some(it => it.name === name)) name = (base.slice(0, 72) + ' (' + n++ + ')').slice(0, 80);
+  return name;
+}
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
+  if (S.text !== it.content && hasUnsavedText() &&
+      !window.confirm('El editor tiene cambios sin guardar. ¿Reemplazarlos por «' + it.name + '»?')) return;
+  S.loadedId = it.id;
   S.title = it.name; S.text = it.content; S.words = countWords(S.text);
   el.title.value = S.title; el.text.value = S.text;
   saveDraft(); renderSetup(); closeLib(); flash('Guion cargado');
@@ -878,9 +889,15 @@ function loadScript(id) {
 async function saveScript() {
   const text = S.text.trim(); if (!text) return;
   if (S.text.length > MAX_SCRIPT_LENGTH) { flash('El guion es demasiado largo para guardarlo.'); return; }
-  const name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
+  let name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
   const now = Date.now();
-  const existing = S.scripts.find(s => s.name === name);
+  let existing = S.scripts.find(s => s.name === name);
+  let renamed = false;
+  // Otro guion con el mismo título: no se sobrescribe sin confirmación.
+  if (existing && existing.id !== S.loadedId && existing.content !== S.text &&
+      !window.confirm('Ya existe un guion llamado «' + name + '». ¿Reemplazarlo?\n\nCancelar lo guardará como un guion nuevo.')) {
+    name = uniqueName(name); existing = null; renamed = true;
+  }
   const previous = existing ? { ...existing } : null;
   const it = existing || { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: '', savedAt: now, pending: true };
   it.content = S.text; it.savedAt = now; it.pending = true;
@@ -890,8 +907,11 @@ async function saveScript() {
     else S.scripts = S.scripts.filter(s => s !== it);
     renderSetup(); flash('No se pudo guardar. Exporta una copia de seguridad.'); return;
   }
+  S.loadedId = it.id;
+  if (renamed) { S.title = it.name; el.title.value = it.name; }
+  flushDraft();
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  renderSetup(); flash('Guardado ✓');
+  renderSetup(); flash(renamed ? 'Guardado como «' + it.name + '» ✓' : 'Guardado ✓');
   if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
   else syncCloud();
 }
@@ -987,14 +1007,21 @@ const validSavedAt = v => { const n = Number(v), now = Date.now(); return Number
 /* Convierte el archivo en [{name, content, savedAt}]; lanza Error con mensaje para el usuario */
 function parseImport(fileName, raw) {
   const txt = raw.replace(/^﻿/, '');
-  const isJson = /\.json$/i.test(fileName) || /^\s*[\[{]/.test(txt);
+  // Un .txt puede empezar con una indicación como «[pausa]»: solo la extensión
+  // .json, o un contenido que realmente sea JSON, se interpreta como exportación.
+  const ext = (fileName.match(/\.([^./\\]+)$/) || ['', ''])[1].toLowerCase();
+  let data, isJson = ext === 'json';
+  if (!isJson && ext !== 'txt' && /^\s*[\[{]/.test(txt)) {
+    try { data = JSON.parse(txt); isJson = true; } catch (e) { /* texto plano */ }
+  }
   if (!isJson) {
     if (!txt.trim()) throw new Error('El archivo está vacío.');
     const base = fileName.replace(/\.[^.]*$/, '').trim();
     return [{ name: base || firstLine(txt), content: txt.replace(/\r\n?/g, '\n'), savedAt: Date.now() }];
   }
-  let data;
-  try { data = JSON.parse(txt); } catch (e) { throw new Error('El archivo .json no es válido.'); }
+  if (data === undefined) {
+    try { data = JSON.parse(txt); } catch (e) { throw new Error('El archivo .json no es válido.'); }
+  }
   const arr = Array.isArray(data) ? data : (data && Array.isArray(data.scripts) ? data.scripts : null);
   if (!arr) throw new Error('El archivo no contiene guiones de Prompter.');
   return arr.slice(0, 500).filter(x => x && typeof x.content === 'string')
