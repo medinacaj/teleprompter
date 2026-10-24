@@ -612,11 +612,18 @@ async function saveScript() {
   if (S.text.length > 200000) { flash('El guion es demasiado largo para guardarlo.'); return; }
   const name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
   const now = Date.now();
-  let it = S.scripts.find(s => s.name === name);
-  if (it) { it.content = S.text; it.savedAt = now; it.pending = true; }
-  else { it = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: S.text, savedAt: now, pending: true }; S.scripts.push(it); }
+  const existing = S.scripts.find(s => s.name === name);
+  const previous = existing ? { ...existing } : null;
+  const it = existing || { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: '', savedAt: now, pending: true };
+  it.content = S.text; it.savedAt = now; it.pending = true;
+  if (!existing) S.scripts.push(it);
+  if (!persistLib()) {
+    if (previous) Object.assign(it, previous);
+    else S.scripts = S.scripts.filter(s => s !== it);
+    renderSetup(); flash('No se pudo guardar. Exporta una copia de seguridad.'); return;
+  }
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  const stored = persistLib(); renderSetup(); flash(stored ? 'Guardado ✓' : 'No se pudo guardar en este dispositivo. Exporta una copia.');
+  renderSetup(); flash('Guardado ✓');
   if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
   else syncCloud();
 }
