@@ -32,3 +32,10 @@ assert.match(html, /serviceWorker\.register/);
 assert.match(html, /id="libSearch"/);
 assert.match(html, /K_SESSION/);
 console.log('OK: PWA, offline worker, library search and session recovery');
+
+for (const id of ['btnFullscreen', 'readerContrast', 'rWords']) {
+  assert.ok(html.includes('id="' + id + '"'), 'Missing new control ' + id);
+}
+assert.match(html, /fullscreenchange/);
+assert.match(html, /high-contrast/);
+console.log('OK: fullscreen, high contrast and reading progress');
