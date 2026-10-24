@@ -289,6 +289,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   <div class="hud">
     <span class="time" id="rTime">0:00 / 0:00</span>
     <span class="ppm" id="rPpm">140 ppm</span>
+    <span class="ppm" id="rWords" aria-label="Palabras estimadas leídas">0 palabras</span>
     <span class="status"><i class="tally"></i><span id="rStatus">Listo</span></span>
   </div>
   <div class="bar"><i id="rFill"></i></div>
@@ -380,7 +381,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 
 const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
- 'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
+ 'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
@@ -805,6 +806,7 @@ function updateHud() {
   if (a !== R.tA || b !== R.tB) { el.rTime.textContent = a + ' / ' + b; R.tA = a; R.tB = b; }
   el.rFill.style.transform = 'scaleX(' + S.p.toFixed(4) + ')';
   el.rPpm.textContent = S.prefs.wpm + ' ppm';
+  el.rWords.textContent = Math.round(S.words * S.p) + ' / ' + S.words + ' palabras';
 }
 function updateStatus() {
   let t = 'Listo';
