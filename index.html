@@ -423,8 +423,9 @@ function press(btn, fn) {
 let prefT = 0, draftT = 0;
 function savePrefs() { clearTimeout(prefT); prefT = setTimeout(flushPrefs, 250); }
 function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
-function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => ls.set(K_DRAFT, { t: S.title, x: S.text }), 400); }
-function persistLib() { ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
+function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text }); }
+function saveDraft() { clearTimeout(draftT); draftT = setTimeout(flushDraft, 400); }
+function persistLib() { return ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
 
 /* ================= Configuración (pantalla inicial) ================= */
 function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
@@ -574,7 +575,7 @@ async function saveScript() {
   if (it) { it.content = S.text; it.savedAt = now; it.pending = true; }
   else { it = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: S.text, savedAt: now, pending: true }; S.scripts.push(it); }
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  persistLib(); renderSetup(); flash('Guardado ✓');
+  const stored = persistLib(); renderSetup(); flash(stored ? 'Guardado ✓' : 'No se pudo guardar en este dispositivo. Exporta una copia.');
   if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
   else syncCloud();
 }
@@ -912,10 +913,10 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('resize', () => { if (S.view === 'reader') { cancelAnimationFrame(R.rz); R.rz = requestAnimationFrame(layout); } });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (S.playing) pause(); flushPrefs(); }
+  if (document.hidden) { if (S.playing) pause(); if (S.counting) endCountdown(false); flushPrefs(); flushDraft(); }
   else if (S.view === 'reader') lockScreen();
 });
-window.addEventListener('pagehide', flushPrefs);
+window.addEventListener('pagehide', () => { flushPrefs(); flushDraft(); });
 
 /* Mantiene la pantalla encendida mientras lees */
 async function lockScreen() {
