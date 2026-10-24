@@ -601,10 +601,27 @@ function renderLibrary() {
   el.btnExport.disabled = !S.scripts.length;
   el.libNote.textContent = Cloud.synced ? 'Sincronizados con tu cuenta.' : 'Guardados en este dispositivo.';
 }
-function openLib() { el.lib.hidden = false; el.libSearch.value = ''; libMsg(''); renderLibrary(); el.libSearch.focus(); syncCloud(); }
+function openLib() {
+  el.lib.hidden = false; el.libSearch.value = ''; libMsg(''); renderLibrary();
+  el.setup.setAttribute('inert', ''); el.reader.setAttribute('inert', '');
+  el.libSearch.focus(); syncCloud();
+}
 el.libSearch.addEventListener('input', renderLibrary);
 el.libSort.addEventListener('change', renderLibrary);
-function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
+function closeLib() {
+  el.lib.hidden = true;
+  el.setup.removeAttribute('inert'); el.reader.removeAttribute('inert');
+  el.btnLib.focus();
+}
+el.lib.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(el.lib.querySelectorAll('button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), a[href]'))
+    .filter(node => !node.closest('[hidden]'));
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
   S.title = it.name; S.text = it.content; S.words = countWords(S.text);
