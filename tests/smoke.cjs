@@ -120,3 +120,8 @@ console.log('OK: touch-scroll playback guard and fullscreen Escape handling');
 assert.match(html, /else if \(!interactive\) \{ closeReader\(\); e\.preventDefault\(\); \}/);
 assert.match(html, /el\.btnStart\.focus\(\{ preventScroll: true \}\)/);
 console.log('OK: reader keyboard focus and native Escape behavior');
+
+assert.match(html, /el\.setup\.setAttribute\('inert', ''\)/);
+assert.match(html, /el\.setup\.removeAttribute\('inert'\)/);
+assert.match(html, /el\.lib\.addEventListener\('keydown', e => \{/);
+console.log('OK: library dialog focus trap and inert background');
