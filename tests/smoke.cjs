@@ -49,3 +49,9 @@ assert.match(html, /id="libSort"/);
 assert.match(html, /localeCompare\(b\.name, 'es'\)/);
 assert.match(html, /Math\.imul\(h, 16777619\)/);
 console.log('OK: library sorting and compact bookmark key');
+
+assert.match(html, /id="readingStats"/);
+assert.match(html, /function recordReading\(completed\)/);
+assert.match(html, /K_STATS/);
+assert.match(html, /R\.statsRecorded = false/);
+console.log('OK: local reading statistics');
