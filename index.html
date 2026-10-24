@@ -490,7 +490,7 @@ el.mirrorSw.addEventListener('click', () => setMirror(!S.prefs.mirror));
 el.popMirror.addEventListener('click', () => setMirror(!S.prefs.mirror));
 el.readerContrast.addEventListener('click', () => { S.prefs.contrast = !S.prefs.contrast; savePrefs(); renderSetup(); });
 el.tips.textContent = matchMedia('(pointer:fine)').matches
-  ? 'Durante la lectura: toca el texto o pulsa Espacio para pausar · ↑ ↓ cambian la velocidad · Esc sale.'
+  ? 'Durante la lectura: Espacio pausa · ↑ ↓ velocidad · ← → avanza o retrocede 5 % · Inicio/Fin salta · Esc sale.'
   : 'Durante la lectura: toca el texto para pausar o reanudar.';
 el.tips.textContent += ' Escribe las indicaciones [entre corchetes]: se ven aparte y no suman tiempo.';
 
@@ -901,6 +901,15 @@ function finish() {
   recordReading(true); updateStatus(); updateHud();
 }
 function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
+function seekReader(progress) {
+  if (S.view !== 'reader') return;
+  pause(); if (S.counting) endCountdown(false);
+  S.p = clamp(progress, 0, 0.999);
+  S.finished = false;
+  const pos = S.p * maxScroll();
+  el.scroller.scrollTop = pos; R.lastSet = pos;
+  updateActive(pos, true); updateHud(); updateStatus(); saveSession();
+}
 function restart() {
   if (!S.finished) recordReading(false);
   R.statsRecorded = false;
@@ -1028,6 +1037,10 @@ document.addEventListener('keydown', e => {
   if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); setWpm(S.prefs.wpm + WPM[2]); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); setWpm(S.prefs.wpm - WPM[2]); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); seekReader(S.p - 0.05); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); seekReader(S.p + 0.05); }
+  else if (e.key === 'Home') { e.preventDefault(); seekReader(0); }
+  else if (e.key === 'End') { e.preventDefault(); seekReader(0.999); }
 });
 window.addEventListener('resize', () => { if (S.view === 'reader') { cancelAnimationFrame(R.rz); R.rz = requestAnimationFrame(layout); } });
 document.addEventListener('visibilitychange', () => {
