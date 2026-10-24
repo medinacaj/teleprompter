@@ -330,6 +330,8 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <div class="row" style="padding-bottom:0;border-top:1px solid var(--line)">
         <button type="button" class="btn" id="btnRestart"><svg class="ic" aria-hidden="true"><use href="#i-replay"/></svg>Reiniciar lectura</button>
         <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
+        <button type="button" class="btn" id="btnBookmarkSave">Guardar marcador</button>
+        <button type="button" class="btn" id="btnBookmarkGo">Ir al marcador</button>
         <div class="row"><span class="lbl" id="readerContrastLabel">Alto contraste</span><button type="button" class="switch" id="readerContrast" role="switch" aria-checked="false" aria-labelledby="readerContrastLabel"></button></div>
       </div>
     </div>
@@ -358,7 +360,7 @@ const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
 const LH = 1.5;                  // interlineado del texto
 const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
 const MIN_DUR = 4;               // duración mínima de una lectura (s)
-const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session';
+const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session', K_BOOKMARKS = 'prompter:v2:bookmarks';
 
 /* Almacenamiento local (con try/catch: puede estar bloqueado) */
 const ls = {
@@ -383,7 +385,7 @@ const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','btnFullscreen','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -927,6 +929,21 @@ el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePo
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
+const bookmarkKey = () => S.title + '\\n' + S.text;
+el.btnBookmarkSave.addEventListener('click', () => {
+  const key = bookmarkKey(), saved = ls.get(K_BOOKMARKS) || {};
+  saved[key] = clamp(S.p, 0, 1);
+  if (!ls.set(K_BOOKMARKS, saved)) { flash('No se pudo guardar el marcador.'); return; }
+  closePop(); flash('Marcador guardado.');
+});
+el.btnBookmarkGo.addEventListener('click', () => {
+  const saved = ls.get(K_BOOKMARKS) || {}, progress = saved[bookmarkKey()];
+  if (!Number.isFinite(progress)) { closePop(); flash('Este guion no tiene marcador.'); return; }
+  pause(); endCountdown(false);
+  S.p = clamp(progress, 0, 1); S.finished = false;
+  const pos = S.p * maxScroll(); el.scroller.scrollTop = pos; R.lastSet = pos;
+  updateActive(pos, true); updateHud(); updateStatus(); saveSession(); closePop();
+});
 el.btnFullscreen.addEventListener('click', async () => {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
