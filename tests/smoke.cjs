@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v3/);
+assert.match(worker, /prompter-static-v4/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -131,3 +131,19 @@ assert.match(html, /S\.dels = Cloud\.avail !== false && !S\.dels\.includes\(id\)
 assert.match(html, /S\.scripts = previous; S\.dels = previousDels/);
 assert.match(html, /S\.dels = S\.dels\.filter\(x => x !== id\)/);
 console.log('OK: cloud deletion tombstones are persisted atomically');
+
+assert.equal(manifest.theme_color, '#000000');
+assert.equal(manifest.background_color, '#000000');
+assert.match(html, /<meta name="theme-color" content="#000000">/);
+assert.match(html, /STUDIO EDITION/);
+assert.match(html, /<header class="studio-hero">/);
+assert.match(html, /class="editor-panel" aria-labelledby="editorHeading"/);
+assert.match(html, /class="settings-panel" aria-labelledby="settingsHeading"/);
+assert.match(html, /class="launch-panel" aria-labelledby="launchHeading"/);
+assert.match(html, /class="session-panel" aria-label="Estadísticas locales"/);
+assert.match(html, /--bg:#000000; --panel:#1d1d1f/);
+assert.match(html, /--btn:#0071e3; --btn-h:#1687fa/);
+assert.match(html, /\.studio-hero h1\{/);
+assert.match(html, /@media\(max-width:560px\)/);
+assert.match(html, /\.band\{background:rgba\(41,151,255/);
+console.log('OK: Studio Edition design, responsive panels, blue reading guide and PWA theme');
