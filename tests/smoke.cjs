@@ -104,3 +104,10 @@ assert.match(html, /const snapshot = S\.scripts\.map\(it => \(\{ \.\.\.it \}\)\)
 assert.match(html, /if \(!stored\) \{ S\.scripts = snapshot/);
 assert.match(html, /const progress = saved\[bookmarkKey\(\)\]/);
 console.log('OK: import rollback and resilient bookmark reads');
+
+assert.match(html, /Number\.isFinite\(p\.fs\)/);
+assert.match(html, /Number\.isFinite\(p\.wpm\)/);
+assert.match(html, /const MAX_SCRIPT_LENGTH = 200000/);
+assert.match(html, /!seenIds\.has\(x\.id\)/);
+assert.match(html, /Number\.isFinite\(st\.sessions\)/);
+console.log('OK: validation of stored preferences, library and statistics');
