@@ -91,3 +91,7 @@ assert.match(worker, /prompter-static-v3/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
+
+assert.match(html, /keys\.length - 100/);
+assert.match(html, /flex-wrap:wrap/);
+console.log('OK: bounded bookmarks and reader settings layout');
