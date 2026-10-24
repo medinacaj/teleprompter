@@ -902,6 +902,8 @@ function finish() {
 }
 function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
 function restart() {
+  if (!S.finished) recordReading(false);
+  R.statsRecorded = false;
   pause(); S.p = 0; S.elapsed = 0; S.finished = false;
   const v = 0; el.scroller.scrollTop = v; R.lastSet = v;
   updateActive(0, true); updateHud(); startCountdown();
