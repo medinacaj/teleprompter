@@ -1090,7 +1090,12 @@ el.scroller.addEventListener('scroll', () => {
 
 document.addEventListener('keydown', e => {
   if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
-  if (e.key === 'Escape') { if (!el.pop.hidden) closePop(); else closeReader(); return; }
+  if (e.key === 'Escape') {
+    if (!el.pop.hidden) { closePop(); e.preventDefault(); }
+    else if (document.fullscreenElement === el.reader) { /* El navegador gestiona Escape para salir de pantalla completa. */ }
+    else { closeReader(); e.preventDefault(); }
+    return;
+  }
   // No interceptar teclas al escribir ni al usar controles interactivos.
   const target = e.target;
   if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing ||
