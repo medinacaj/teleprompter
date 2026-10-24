@@ -349,7 +349,7 @@ const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
 const LH = 1.5;                  // interlineado del texto
 const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
 const MIN_DUR = 4;               // duración mínima de una lectura (s)
-const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft';
+const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session';
 
 /* Almacenamiento local (con try/catch: puede estar bloqueado) */
 const ls = {
@@ -426,6 +426,11 @@ function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
 function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text }); }
 function saveDraft() { clearTimeout(draftT); draftT = setTimeout(flushDraft, 400); }
 function persistLib() { return ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
+function saveSession() {
+  if (S.view !== 'reader') return;
+  ls.set(K_SESSION, { title: S.title, text: S.text, p: S.p, elapsed: S.elapsed, savedAt: Date.now() });
+}
+function clearSession() { try { localStorage.removeItem(K_SESSION); } catch (e) { /* almacenamiento bloqueado */ } }
 
 /* ================= Configuración (pantalla inicial) ================= */
 function setSwitch(btn, on) { btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
@@ -852,6 +857,7 @@ function endCountdown(start) {
 
 function openReader() {
   if (!S.text.trim()) return;
+  clearSession();
   R.sy = window.scrollY;
   S.view = 'reader'; S.words = countWords(S.text);
   el.setup.hidden = true; el.reader.hidden = false;
@@ -863,7 +869,7 @@ function openReader() {
   updateHud(); startCountdown(); lockScreen();
 }
 function closeReader() {
-  pause(); endCountdown(false); closePop(); unlockScreen();
+  pause(); endCountdown(false); closePop(); unlockScreen(); clearSession();
   S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
   renderSetup();
   requestAnimationFrame(() => window.scrollTo(0, R.sy));
@@ -918,10 +924,10 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('resize', () => { if (S.view === 'reader') { cancelAnimationFrame(R.rz); R.rz = requestAnimationFrame(layout); } });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (S.playing) pause(); if (S.counting) endCountdown(false); flushPrefs(); flushDraft(); }
+  if (document.hidden) { if (S.playing) pause(); if (S.counting) endCountdown(false); saveSession(); flushPrefs(); flushDraft(); }
   else if (S.view === 'reader') lockScreen();
 });
-window.addEventListener('pagehide', () => { flushPrefs(); flushDraft(); });
+window.addEventListener('pagehide', () => { saveSession(); flushPrefs(); flushDraft(); });
 
 /* Mantiene la pantalla encendida mientras lees */
 async function lockScreen() {
@@ -929,6 +935,21 @@ async function lockScreen() {
 }
 function unlockScreen() { try { if (R.wake) R.wake.release(); } catch (e) { /* nada */ } R.wake = null; }
 
+/* Recuperación voluntaria: no iniciar reproducción automáticamente tras un cierre. */
+const previousSession = ls.get(K_SESSION);
+if (previousSession && typeof previousSession.text === 'string' && previousSession.text.trim() &&
+    previousSession.text === S.text && Number.isFinite(previousSession.p) &&
+    previousSession.p > 0.01 && previousSession.p < 1 &&
+    Date.now() - previousSession.savedAt < 7 * 86400000) {
+  if (window.confirm('Hay una lectura interrumpida. ¿Quieres recuperar su posición?')) {
+    openReader();
+    endCountdown(false);
+    S.p = clamp(previousSession.p, 0, 1);
+    S.elapsed = Math.max(0, Number(previousSession.elapsed) || 0);
+    layout(); updateHud(); updateStatus();
+    saveSession();
+  } else clearSession();
+}
 /* Inicio */
 renderSetup();
 renderLibrary();
