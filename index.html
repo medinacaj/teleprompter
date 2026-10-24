@@ -417,6 +417,7 @@ function press(btn, fn) {
   btn.addEventListener('click', e => { if (e.detail === 0) fn(); });
 }
 
+const MAX_SCRIPT_LENGTH = 200000;
 /* ================= Preferencias, biblioteca y borrador ================= */
 (function load() {
   const p = ls.get(K_PREFS);
@@ -430,8 +431,11 @@ function press(btn, fn) {
   }
   const d = ls.get(K_LIB);
   if (d && Array.isArray(d.scripts)) {
-    S.scripts = d.scripts.filter(x => x && typeof x.id === 'string' && typeof x.content === 'string')
-      .map(x => ({ id: x.id, name: String(x.name || 'Guion'), content: x.content, savedAt: Number(x.savedAt) || 0, pending: !!x.pending }));
+    const seenIds = new Set();
+    S.scripts = d.scripts.filter(x => x && typeof x.id === 'string' && x.id.length <= 100 &&
+      !seenIds.has(x.id) && typeof x.content === 'string' && x.content.length <= MAX_SCRIPT_LENGTH)
+      .map(x => { seenIds.add(x.id); return { id: x.id, name: String(x.name || 'Guion').slice(0, 80),
+        content: x.content, savedAt: Number.isFinite(x.savedAt) ? x.savedAt : 0, pending: !!x.pending }; });
   }
   if (d && Array.isArray(d.dels)) S.dels = d.dels.filter(x => typeof x === 'string').slice(0, 200);
   const dr = ls.get(K_DRAFT);
