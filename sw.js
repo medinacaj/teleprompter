@@ -1,5 +1,5 @@
 /* Solo se almacenan archivos públicos de la aplicación, nunca guiones. */
-const CACHE = 'prompter-static-v2';
+const CACHE = 'prompter-static-v3';
 const ASSETS = ['./index.html', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
@@ -29,5 +29,12 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (!ASSETS.some(path => new URL(path, self.registration.scope).pathname === url.pathname)) return;
-  event.respondWith(caches.match(request, { ignoreSearch: true }).then(cached => cached || fetch(request)));
+  event.respondWith(caches.match(request, { ignoreSearch: true }).then(cached => cached || fetch(request).then(response => {
+    if (response.ok && response.type === 'basic') {
+      const copy = response.clone();
+      event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)));
+    }
+    return response;
+  })));
+
 });
