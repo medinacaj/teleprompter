@@ -585,7 +585,7 @@ async function deleteScript(id) {
   if (!persistLib()) { S.scripts = previous; libMsg('No se pudo eliminar: almacenamiento no disponible.'); return; }
   renderSetup(); renderLibrary();
   if (Cloud.synced) { try { await Cloud.coll.doc(id).delete(); return; } catch (e) { /* se reintenta luego */ } }
-  if (Cloud.avail !== false && !S.dels.includes(id)) { S.dels.push(id); persistLib(); }
+  if (Cloud.avail !== false && !S.dels.includes(id)) { S.dels.push(id); if (!persistLib()) { S.dels.pop(); libMsg('No se pudo registrar la eliminación para sincronización.'); } }
 }
 el.btnSave.addEventListener('click', saveScript);
 el.btnLib.addEventListener('click', openLib);
