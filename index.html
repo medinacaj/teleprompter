@@ -367,7 +367,7 @@ const S = {
   p: 0,            // progreso 0..1 de la lectura
   elapsed: 0       // cronómetro real (s), solo avanza leyendo
 };
-const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '' };
+const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1 };
 const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
 
 const el = {};
@@ -815,6 +815,7 @@ function frame(ts) {
   updateActive(pos);
   updateHud();
   if (S.p >= 1) { finish(); return; }
+  if (Math.floor(S.elapsed) % 5 === 0 && Math.floor(S.elapsed) !== R.sessionTick) { R.sessionTick = Math.floor(S.elapsed); saveSession(); }
   R.raf = requestAnimationFrame(frame);
 }
 function play() {
@@ -828,7 +829,7 @@ function pause() {
   if (R.raf) { cancelAnimationFrame(R.raf); R.raf = 0; }
   updateStatus();
 }
-function finish() { pause(); S.finished = true; S.p = 1; updateStatus(); updateHud(); }
+function finish() { pause(); S.finished = true; S.p = 1; clearSession(); updateStatus(); updateHud(); }
 function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
 function restart() {
   pause(); S.p = 0; S.elapsed = 0; S.finished = false;
