@@ -43,7 +43,7 @@ Trabajo futuro, si el riesgo lo justifica: mover funciones de valor al servidor,
 2. **Supabase.** Reactiva el proyecto (está pausado) o crea uno nuevo. Aplica `supabase/migrations/20261024000000_subscriptions.sql`. En Authentication → URL Configuration:
    - Site URL: el dominio de Vercel.
    - Redirect URLs: `https://DOMINIO/login/*`.
-3. **Vercel.** Importa el repositorio (el preset de framework es «Other»; no hay comando de build) y carga las variables de `.env.example`. En previews puedes usar `BILLING_DEMO=true` para probar sin cobro.
+3. **Vercel.** Proyecto `teleprompter`, dominio `https://teleprompter-medinacaj.vercel.app` (`teleprompter.vercel.app` pertenece a otra cuenta; para un nombre sin sufijo hace falta un dominio propio). Importa el repositorio (el preset de framework es «Other»; no hay comando de build) y carga las variables de `.env.example`. En previews puedes usar `BILLING_DEMO=true` para probar sin cobro.
 4. **PayPal Sandbox**, cuando quieras activar los cobros:
    - Crea la app REST, el producto y el plan mensual de US$1,00.
    - Crea un webhook a `https://DOMINIO/api/paypal/webhook` con los eventos de `docs/PAYPAL_INTEGRACION.md`.

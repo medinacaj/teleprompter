@@ -2,7 +2,7 @@
 <!-- Completar <loc> con el dominio definitivo antes de publicar (las URL del sitemap deben ser absolutas). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://teleprompter-preview-aj.vercel.app/</loc>
+    <loc>https://teleprompter-medinacaj.vercel.app/</loc>
     <lastmod>2026-10-24</lastmod>
   </url>
 </urlset>
