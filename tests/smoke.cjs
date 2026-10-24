@@ -76,3 +76,8 @@ for (const match of idsList[0].matchAll(/'([^']+)'/g)) {
 }
 assert.match(html, /id="btnResetStats"/);
 console.log('OK: unique DOM ids, complete element registry and statistics reset');
+
+for (const id of ['lineDown','lineUp','lineVal']) assert.match(html, new RegExp('id="' + id + '"'));
+assert.match(html, /function setLineSpacing\(v\)/);
+assert.match(html, /--line-spacing/);
+console.log('OK: adjustable reader line spacing');
