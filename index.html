@@ -639,7 +639,7 @@ async function duplicateScript(id) {
   const copy = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: original.content, savedAt: now, pending: true };
   S.scripts.unshift(copy);
   if (!persistLib()) {
-    S.scripts.shift();
+    S.scripts = S.scripts.filter(it => it !== copy);
     libMsg('No se pudo duplicar: almacenamiento no disponible.');
     return;
   }
