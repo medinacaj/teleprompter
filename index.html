@@ -543,7 +543,12 @@ function renderLibrary() {
   if (!S.scripts.length) {
     const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'Aún no tienes guiones guardados.'; list.appendChild(p);
   }
-  for (const it of S.scripts) {
+  const term = el.libSearch.value.trim().toLocaleLowerCase('es');
+  const matches = S.scripts.filter(it => !term || (it.name + ' ' + it.content).toLocaleLowerCase('es').includes(term));
+  if (S.scripts.length && !matches.length) {
+    const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No hay guiones que coincidan con la búsqueda.'; list.appendChild(p);
+  }
+  for (const it of matches) {
     const row = document.createElement('div'); row.className = 'item';
     const open = document.createElement('button'); open.type = 'button'; open.className = 'open';
     const n = document.createElement('span'); n.className = 'name'; n.textContent = it.name;
@@ -566,7 +571,8 @@ function renderLibrary() {
   el.btnExport.disabled = !S.scripts.length;
   el.libNote.textContent = Cloud.synced ? 'Sincronizados con tu cuenta.' : 'Guardados en este dispositivo.';
 }
-function openLib() { el.lib.hidden = false; libMsg(''); renderLibrary(); el.libClose.focus(); syncCloud(); }
+function openLib() { el.lib.hidden = false; el.libSearch.value = ''; libMsg(''); renderLibrary(); el.libSearch.focus(); syncCloud(); }
+el.libSearch.addEventListener('input', renderLibrary);
 function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
