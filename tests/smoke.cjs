@@ -111,3 +111,8 @@ assert.match(html, /const MAX_SCRIPT_LENGTH = 200000/);
 assert.match(html, /!seenIds\.has\(x\.id\)/);
 assert.match(html, /Number\.isFinite\(st\.sessions\)/);
 console.log('OK: validation of stored preferences, library and statistics');
+
+assert.match(html, /touchMoved = true/);
+assert.match(html, /R\.swallow = Date\.now\(\) \+ 500/);
+assert.match(html, /document\.fullscreenElement === el\.reader\) \{ \/\* El navegador gestiona Escape/);
+console.log('OK: touch-scroll playback guard and fullscreen Escape handling');
