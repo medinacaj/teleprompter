@@ -981,6 +981,7 @@ function closeReader() {
   recordReading(false);
   S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
   renderSetup();
+  el.btnStart.focus({ preventScroll: true });
   requestAnimationFrame(() => window.scrollTo(0, R.sy));
 }
 
