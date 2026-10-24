@@ -233,6 +233,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
   <p class="meta" id="meta"></p>
   <p class="meta" id="readingStats" aria-live="polite"></p>
+  <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
 
   <section class="card" aria-label="Ajustes de lectura">
     <div class="row">
@@ -384,7 +385,7 @@ const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, la
 const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
 
 const el = {};
-['setup','title','text','meta','readingStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
+['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
@@ -891,8 +892,14 @@ function recordReading(completed) {
   stats.seconds = Math.max(0, Number(stats.seconds) || 0) + Math.round(S.elapsed);
   if (ls.set(K_STATS, stats)) renderStats();
 }
+el.btnResetStats.addEventListener('click', () => {
+  if (!window.confirm('¿Eliminar todas las estadísticas de lectura guardadas en este dispositivo?')) return;
+  try { localStorage.removeItem(K_STATS); } catch (e) { flash('No se pudieron eliminar las estadísticas.'); return; }
+  renderStats(); flash('Estadísticas eliminadas.');
+});
 function renderStats() {
   const st = ls.get(K_STATS);
+  el.btnResetStats.hidden = !(st && st.sessions);
   el.readingStats.textContent = st && st.sessions ?
     'Actividad en este dispositivo: ' + st.sessions + ' sesiones · ' + (st.completed || 0) + ' completas · ' + fmt(st.seconds || 0) + ' de lectura' : '';
 }
