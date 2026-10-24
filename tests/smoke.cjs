@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v7/);
+assert.match(worker, /prompter-static-v8/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -168,3 +168,8 @@ assert.match(html, /speed-progress/);
 assert.ok(!html.includes('id="btnSlow"'));
 assert.ok(!html.includes('id="btnFast"'));
 console.log('OK: speed slider and cache rotation');
+
+assert.ok(!html.includes('Pega o escribe tu guion para empezar.'), 'Do not repeat textarea placeholder underneath the editor');
+assert.match(html, /#setup \.setup-editor \.meta:empty\{display:none\}/);
+assert.match(html, /: '';/);
+console.log('OK: empty editor shows no redundant message; entered text retains word-count metadata');
