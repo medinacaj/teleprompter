@@ -337,6 +337,30 @@ textarea.field{min-height:330px;margin-top:0;border-radius:21px;line-height:1.65
   button,.btn,.ib,.step,.field,.switch{transition:none}
 }
 
+/* Control de velocidad integrado: lectura sin botones ambiguos +/- */
+.reader .hud #rPpm{display:none}
+.reader .controls{max-width:660px;justify-content:space-between;gap:clamp(4px,1.8vw,15px);padding:7px 12px}
+.reader .controls>.ib:not(.play){width:43px;height:43px;flex:0 0 43px}
+.reader .controls>.play{flex:0 0 58px;width:58px;height:58px}
+.speed-control{min-width:0;flex:1 1 190px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:2px clamp(3px,1vw,10px)}
+.speed-head{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#c7c7d0;font-size:.7rem;line-height:1.1;font-weight:500}
+.speed-head output{color:#f5f5f7;font:600 .73rem/1.2 var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.speed-range{display:block;width:100%;height:30px;cursor:pointer;appearance:none;-webkit-appearance:none;background:transparent;margin:0;padding:0;border:0;touch-action:auto}
+.speed-range::-webkit-slider-runnable-track{height:5px;border-radius:999px;background:linear-gradient(to right,#2997ff 0%,#2997ff var(--speed-progress,33.33%),#64646e var(--speed-progress,33.33%),#64646e 100%)}
+.speed-range::-moz-range-track{height:5px;border-radius:999px;background:#64646e}
+.speed-range::-moz-range-progress{height:5px;border-radius:999px;background:#2997ff}
+.speed-range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;height:22px;width:22px;border:3px solid #2997ff;border-radius:50%;background:#fff;margin-top:-8.5px;box-shadow:none}
+.speed-range::-moz-range-thumb{height:17px;width:17px;border:3px solid #2997ff;border-radius:50%;background:#fff;box-shadow:none}
+.speed-range:focus-visible{outline:2px solid #2997ff;outline-offset:2px;border-radius:12px}
+@media(max-width:410px){
+  .reader .controls{gap:3px;padding:6px 8px}
+  .reader .controls>.ib:not(.play){width:39px;height:39px;flex-basis:39px}
+  .reader .controls>.play{width:54px;height:54px;flex-basis:54px}
+  .speed-control{padding:2px}
+  .speed-head{font-size:.65rem}
+  .speed-head output{font-size:.68rem}
+}
+
 </style>
 </head>
 <body>
@@ -492,9 +516,14 @@ textarea.field{min-height:330px;margin-top:0;border-radius:21px;line-height:1.65
     </div>
     <div class="controls">
       <button type="button" class="ib" id="btnExit" aria-label="Salir de la lectura"><svg class="ic"><use href="#i-back"/></svg></button>
-      <button type="button" class="ib" id="btnSlow" aria-label="Más lento"><svg class="ic"><use href="#i-minus"/></svg></button>
       <button type="button" class="ib play" id="btnPlay" aria-label="Reproducir"><svg class="ic"><use id="icPlay" href="#i-play"/></svg></button>
-      <button type="button" class="ib" id="btnFast" aria-label="Más rápido"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <div class="speed-control">
+        <div class="speed-head">
+          <label for="speedRange">Velocidad</label>
+          <output id="speedValue" for="speedRange">140 ppm</output>
+        </div>
+        <input type="range" id="speedRange" min="60" max="300" step="5" value="140" aria-label="Velocidad de lectura en palabras por minuto">
+      </div>
       <button type="button" class="ib" id="btnMore" aria-label="Más ajustes" aria-expanded="false" aria-controls="pop"><svg class="ic"><use href="#i-sliders"/></svg></button>
     </div>
   </div>
@@ -539,7 +568,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 const el = {};
 ['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
- 'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
+ 'count','digit','ticks','dock','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','readerFont','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
@@ -614,6 +643,10 @@ function renderSetup() {
   el.fsVal.textContent = S.prefs.fs;
   el.popFsVal.textContent = S.prefs.fs;
   el.wpmVal.textContent = wpm;
+  el.speedRange.value = String(wpm);
+  el.speedValue.textContent = wpm + ' ppm';
+  el.speedRange.setAttribute('aria-valuetext', wpm + ' palabras por minuto');
+  el.speedRange.style.setProperty('--speed-progress', (((wpm - WPM[0]) / (WPM[1] - WPM[0])) * 100).toFixed(2) + '%');
   setSwitch(el.mirrorSw, S.prefs.mirror);
   setSwitch(el.popMirror, S.prefs.mirror);
   setSwitch(el.readerContrast, S.prefs.contrast);
@@ -1233,8 +1266,8 @@ document.addEventListener('fullscreenchange', () => {
   el.btnFullscreen.textContent = document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa';
   if (S.view === 'reader') requestAnimationFrame(layout);
 });
-press(el.btnSlow, () => setWpm(S.prefs.wpm - WPM[2]));
-press(el.btnFast, () => setWpm(S.prefs.wpm + WPM[2]));
+// El control de velocidad funciona en tiempo real y conserva el ajuste.
+el.speedRange.addEventListener('input', () => setWpm(Number(el.speedRange.value)));
 el.btnPlay.addEventListener('click', toggle);
 el.btnExit.addEventListener('click', closeReader);
 el.count.addEventListener('click', () => endCountdown(true));
