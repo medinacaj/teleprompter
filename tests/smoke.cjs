@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v5/);
+assert.match(worker, /prompter-static-v6/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -150,3 +150,16 @@ for (const removedText of ['Tu guion.', 'A tu ritmo.', 'Lectura inmersiva', 'Aju
 assert.match(html, /@media\(max-width:560px\)/);
 assert.match(html, /\.band\{background:rgba\(41,151,255/);
 console.log('OK: compact dark interface without marketing content, blue reading guide and PWA theme');
+
+assert.match(html, /id="speedRange"/);
+assert.match(html, /id="speedValue"/);
+assert.match(html, /min="60" max="300" step="5"/);
+assert.match(html, /for="speedRange">Velocidad/);
+assert.match(html, /speedRange\.addEventListener/);
+assert.match(html, /speedRange\.value = String\(wpm\)/);
+assert.match(html, /speedValue\.textContent/);
+assert.match(html, /aria-valuetext/);
+assert.match(html, /speed-progress/);
+assert.ok(!html.includes('id="btnSlow"'));
+assert.ok(!html.includes('id="btnFast"'));
+console.log('OK: speed slider and cache rotation');
