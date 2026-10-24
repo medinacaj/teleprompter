@@ -952,6 +952,7 @@ function openReader() {
 }
 function closeReader() {
   pause(); endCountdown(false); closePop(); unlockScreen(); clearSession();
+  if (document.fullscreenElement === el.reader) document.exitFullscreen().catch(() => {});
   recordReading(false);
   S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
   renderSetup();
