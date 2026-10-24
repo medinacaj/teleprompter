@@ -81,3 +81,8 @@ for (const id of ['lineDown','lineUp','lineVal']) assert.match(html, new RegExp(
 assert.match(html, /function setLineSpacing\(v\)/);
 assert.match(html, /--line-spacing/);
 console.log('OK: adjustable reader line spacing');
+
+assert.match(html, /id="readerFont"/);
+assert.match(html, /function setReaderFont\(font\)/);
+assert.match(html, /--reader-font/);
+console.log('OK: persisted reader font selection');
