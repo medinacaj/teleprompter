@@ -1090,16 +1090,17 @@ el.scroller.addEventListener('scroll', () => {
 
 document.addEventListener('keydown', e => {
   if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
+  // No interceptar atajos mientras se utiliza un control interactivo.
+  const target = e.target;
+  const interactive = target && target.closest &&
+    target.closest('input, textarea, select, button, a, [contenteditable=""], [contenteditable="true"], [role="textbox"]');
   if (e.key === 'Escape') {
-    if (!el.pop.hidden) { closePop(); e.preventDefault(); }
+    if (!el.pop.hidden) { closePop(); el.btnMore.focus(); e.preventDefault(); }
     else if (document.fullscreenElement === el.reader) { /* El navegador gestiona Escape para salir de pantalla completa. */ }
-    else { closeReader(); e.preventDefault(); }
+    else if (!interactive) { closeReader(); e.preventDefault(); }
     return;
   }
-  // No interceptar teclas al escribir ni al usar controles interactivos.
-  const target = e.target;
-  if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing ||
-      (target && target.closest && target.closest('input, textarea, select, button, a, [contenteditable=""], [contenteditable="true"], [role="textbox"]'))) return;
+  if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing || interactive) return;
   if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); setWpm(S.prefs.wpm + WPM[2]); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); setWpm(S.prefs.wpm - WPM[2]); }
