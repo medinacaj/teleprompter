@@ -421,8 +421,8 @@ function press(btn, fn) {
 (function load() {
   const p = ls.get(K_PREFS);
   if (p) {
-    if (typeof p.fs === 'number') S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
-    if (typeof p.wpm === 'number') S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
+    if (Number.isFinite(p.fs)) S.prefs.fs = clamp(Math.round(p.fs / FS[2]) * FS[2], FS[0], FS[1]);
+    if (Number.isFinite(p.wpm)) S.prefs.wpm = clamp(Math.round(p.wpm / WPM[2]) * WPM[2], WPM[0], WPM[1]);
     S.prefs.mirror = !!p.mirror;
     S.prefs.contrast = !!p.contrast;
     if (Number.isFinite(p.lineSpacing)) S.prefs.lineSpacing = clamp(Math.round(p.lineSpacing * 10) / 10, 1.1, 2.1);
@@ -898,7 +898,8 @@ function pause() {
 function recordReading(completed) {
   if (S.elapsed < 2 || R.statsRecorded) return;
   R.statsRecorded = true;
-  const stats = ls.get(K_STATS) || { sessions: 0, completed: 0, seconds: 0 };
+  const stored = ls.get(K_STATS);
+  const stats = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : { sessions: 0, completed: 0, seconds: 0 };
   stats.sessions = Math.max(0, Number(stats.sessions) || 0) + 1;
   stats.completed = Math.max(0, Number(stats.completed) || 0) + (completed ? 1 : 0);
   stats.seconds = Math.max(0, Number(stats.seconds) || 0) + Math.round(S.elapsed);
@@ -910,8 +911,9 @@ el.btnResetStats.addEventListener('click', () => {
   renderStats(); flash('Estadísticas eliminadas.');
 });
 function renderStats() {
-  const st = ls.get(K_STATS);
-  el.btnResetStats.hidden = !(st && st.sessions);
+  const stored = ls.get(K_STATS);
+  const st = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : null;
+  el.btnResetStats.hidden = !(st && Number.isFinite(st.sessions) && st.sessions > 0);
   el.readingStats.textContent = st && st.sessions ?
     'Actividad en este dispositivo: ' + st.sessions + ' sesiones · ' + (st.completed || 0) + ' completas · ' + fmt(st.seconds || 0) + ' de lectura' : '';
 }
