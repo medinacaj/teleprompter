@@ -5,27 +5,11 @@
 <title>Prompter — Lector de guiones para grabar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía, modo espejo y guiones guardados.">
-<meta name="theme-color" content="#000000">
-<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0b0a12">
+<link rel="manifest" href="/app/manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://medinacaj.github.io/teleprompter/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="es_CL">
-<meta property="og:title" content="Prompter — Lector de guiones para grabar">
-<meta property="og:description" content="Pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía y modo espejo.">
-<meta property="og:url" content="https://medinacaj.github.io/teleprompter/">
-<meta property="og:site_name" content="Prompter">
-<meta property="og:image" content="https://medinacaj.github.io/teleprompter/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Prompter, teleprompter web: texto grande con línea guía ámbar">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://medinacaj.github.io/teleprompter/og-image.png">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Prompter — Lector de guiones","url":"https://medinacaj.github.io/teleprompter/","description":"Teleprompter web en español: pega tu guion, ajusta la velocidad y lee con cuenta atrás, línea guía y modo espejo.","applicationCategory":"MultimediaApplication","operatingSystem":"Cualquiera (navegador web)","inLanguage":"es-CL"}
-</script>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/app/icon.svg" type="image/svg+xml">
 <style>
 :root{
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
@@ -403,6 +387,71 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
   #setup .help-disclosure summary,#setup .help-disclosure summary::after{transition:none}
 }
 
+/* ===== Diseño 2026-10: color, movimiento e identidad compartida con el sitio ===== */
+:root{--grad:linear-gradient(115deg,#fbbf24 0%,#fb7185 50%,#a78bfa 100%)}
+body{background:radial-gradient(ellipse 120% 60% at 50% -10%,#1d1830 0%,#0b0a12 62%) fixed,#0b0a12}
+body::before{content:"";position:fixed;inset:-20vmax;z-index:-1;pointer-events:none;
+  background:radial-gradient(28vmax 28vmax at 12% 8%,rgba(251,191,36,.16),transparent 70%),
+             radial-gradient(30vmax 30vmax at 92% 22%,rgba(251,113,133,.13),transparent 70%),
+             radial-gradient(34vmax 34vmax at 40% 105%,rgba(167,139,250,.14),transparent 70%);
+  animation:glow 24s ease-in-out infinite alternate}
+@keyframes glow{to{transform:translate3d(4vmax,3vmax,0) rotate(6deg)}}
+#setup .brand-icon{border:0;background:none;padding:0;box-shadow:0 10px 28px rgba(251,113,133,.22);border-radius:17px}
+#setup .brand-content .tag{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+#setup .brand-content h1{background:linear-gradient(90deg,#fff 0%,#fff 55%,#fde68a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#setup .account-link{display:grid;place-items:center;flex:none;width:42px;height:42px;margin-left:auto;border:1px solid #35353b;border-radius:13px;background:#1b1c20;color:#bfc0ca;transition:color .16s,border-color .16s,background .16s}
+#setup .account-link:hover{color:#fb7185;border-color:rgba(251,113,133,.5);background:#261d22}
+#setup .account-link .ic{width:20px;height:20px}
+#setup .help-disclosure{margin-left:8px}
+#setup .field{background:rgba(21,21,27,.86)}
+#setup textarea.field:focus{box-shadow:0 0 0 4px rgba(251,113,133,.12),0 14px 40px rgba(0,0,0,.35)}
+#setup .setup-settings .card{background:rgba(23,24,30,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#setup .setup-settings .card::before{height:3px;opacity:.9;background:linear-gradient(90deg,#fbbf24,#fb7185,#a78bfa,#22d3ee,#fbbf24);background-size:200% 100%;animation:stripe 7s linear infinite}
+@keyframes stripe{to{background-position:200% 0}}
+#setup .switch[aria-checked="true"]{background:linear-gradient(135deg,#fb7185,#a78bfa);border-color:transparent}
+#setup .actions .btn.primary{border:0;background:var(--grad);background-size:180% 100%;color:#1c1100;box-shadow:0 8px 26px rgba(251,113,133,.28);animation:shine 6s ease-in-out infinite}
+#setup .actions .btn.primary:hover:not(:disabled){background:var(--grad);background-size:180% 100%;box-shadow:0 12px 34px rgba(251,113,133,.42);transform:translateY(-1px)}
+#setup .actions .btn.primary:disabled{animation:none;box-shadow:none}
+@keyframes shine{50%{background-position:100% 0}}
+#setup > *{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+#setup > :nth-child(2){animation-delay:.06s}
+#setup > :nth-child(3){animation-delay:.12s}
+#setup > :nth-child(4){animation-delay:.18s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.bar i{background:var(--grad)}
+.reader.playing .tally{background:#fb7185}
+.count .ring{stroke:url(#ringGrad)}
+
+/* Lector con la misma identidad cálida (antes azul) */
+.reader{--amber:#fbbf24;--teal:#fb7185}
+.reader.playing .tally{background:#fb7185}
+.band{background:rgba(251,191,36,.06);border-top-color:rgba(251,191,36,.34);border-bottom-color:rgba(251,191,36,.34)}
+.band::before{border-left-color:#fbbf24}
+.band::after{border-right-color:#fbbf24}
+.w.cue.cur,.nt{color:#fcd34d}
+.reader.high-contrast .w.cur{text-decoration-color:#fb7185}
+.reader .play,.play{background:var(--grad);color:#1c1100;box-shadow:0 6px 22px rgba(251,113,133,.3)}
+.reader .play:hover,.play:hover{background:var(--grad);color:#1c1100;filter:brightness(1.08)}
+.speed-range::-webkit-slider-runnable-track{background:linear-gradient(to right,#fbbf24 0%,#fb7185 var(--speed-progress,33.33%),#64646e var(--speed-progress,33.33%),#64646e 100%)}
+.speed-range::-moz-range-progress{background:linear-gradient(to right,#fbbf24,#fb7185)}
+.speed-range::-webkit-slider-thumb{border-color:#fb7185}
+.speed-range::-moz-range-thumb{border-color:#fb7185}
+.speed-range:focus-visible{outline-color:#fb7185}
+.reader .switch[aria-checked="true"]{background:linear-gradient(135deg,#fb7185,#a78bfa);border-color:transparent}
+.reader .switch[aria-checked="true"]::after{background:#fff}
+.lib-msg{color:#fcd34d}
+
+/* Aviso de suscripción: cubre la app si no hay acceso verificado */
+.paywall{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(7,6,12,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.paywall-card{width:min(420px,100%);padding:30px 26px;border-radius:26px;text-align:center;background:#1a1726;border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 70px rgba(0,0,0,.5);animation:rise .4s both}
+.paywall-card img{width:60px;height:60px}
+.paywall-card h2{margin:14px 0 8px;font-size:1.4rem}
+.paywall-card p{margin:0 0 20px;color:var(--muted);font-size:.94rem}
+.paywall-card a{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:15px;background:var(--grad);color:#1c1100;font-weight:700;text-decoration:none}
+@media(prefers-reduced-motion:reduce){
+  body::before,#setup > *,#setup .setup-settings .card::before,#setup .actions .btn.primary,.paywall-card{animation:none}
+}
+
 </style>
 </head>
 <body>
@@ -422,6 +471,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
     <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.9-2.5 2-2.5 4"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/></symbol>
   </defs>
@@ -430,13 +480,14 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 <!-- ============ CONFIGURACIÓN ============ -->
 <main id="setup" class="wrap">
   <header class="setup-header">
-    <span class="brand-icon" aria-hidden="true">🎬</span>
+    <img class="brand-icon" src="/app/icon.svg" alt="" width="54" height="54">
     <div class="brand-content">
       <div class="tag">PROMPTER</div>
       <h1>Lector de guiones</h1>
       <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
       <noscript><p class="sub">Activa JavaScript para utilizar el teleprompter.</p></noscript>
     </div>
+    <a class="account-link" href="/cuenta/" aria-label="Mi cuenta" title="Mi cuenta"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></a>
     <details class="help-disclosure">
       <summary aria-label="Ayuda y atajos" title="Ayuda y atajos"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></summary>
       <p class="tips" id="tips"></p>
@@ -524,6 +575,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
     <div class="fade bot" aria-hidden="true"></div>
     <div class="count" id="count" hidden>
       <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset=".5" stop-color="#fb7185"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs>
         <circle class="track" cx="100" cy="100" r="80"/>
         <g class="ticks" id="ticks"></g>
         <line class="cross" x1="100" y1="20" x2="100" y2="180"/>
@@ -576,6 +628,15 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
   </div>
 </section>
 
+<div class="paywall" id="paywall" hidden role="dialog" aria-modal="true" aria-labelledby="paywallTitle">
+  <div class="paywall-card">
+    <img src="/app/icon.svg" alt="" width="60" height="60">
+    <h2 id="paywallTitle">Suscripción necesaria</h2>
+    <p id="paywallText">Para usar Prompter necesitas una suscripción activa.</p>
+    <a href="/cuenta/" id="paywallLink">Ir a mi cuenta</a>
+  </div>
+</div>
+
 <script>
 (() => {
 'use strict';
@@ -615,7 +676,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 const el = {};
 ['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
- 'count','digit','ticks','dock','rMsg','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
+ 'count','digit','ticks','dock','rMsg','paywall','paywallText','paywallLink','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','readerFont','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
@@ -1458,8 +1519,46 @@ if (previousSession && typeof previousSession.text === 'string' && previousSessi
 }
 /* Modo sin conexión: solo recursos estáticos del mismo origen. */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* lectura en línea disponible */ }));
+  window.addEventListener('load', () => navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }).catch(() => { /* lectura en línea disponible */ }));
 }
+/* ================= Acceso por suscripción =================
+   El servidor ya entrega /app/ solo a suscriptores. Esta verificación cubre las copias del HTML
+   abiertas fuera del sitio y las suscripciones que vencen con la app abierta o sin conexión. */
+const K_VERIFIED = 'prompter:v2:verified';
+const OFFLINE_GRACE = 72 * 3600000, RECHECK = 30 * 60000;
+const LOCK_COPY = {
+  sesion: ['Inicia sesión', 'Tu sesión terminó. Ingresa de nuevo para seguir usando Prompter.', '/login/?next=%2Fapp%2F', 'Ingresar'],
+  suscripcion: ['Suscripción necesaria', 'Para usar Prompter necesitas una suscripción activa.', '/cuenta/', 'Ir a mi cuenta'],
+  conexion: ['Conéctate a internet', 'No pudimos verificar tu suscripción. Conéctate para continuar.', '/cuenta/', 'Reintentar']
+};
+function lockApp(reason) {
+  if (S.view === 'reader') { pause(); if (S.counting) endCountdown(false); }
+  const [title, text, href, label] = LOCK_COPY[reason] || LOCK_COPY.suscripcion;
+  $('#paywallTitle').textContent = title; el.paywallText.textContent = text;
+  el.paywallLink.href = href; el.paywallLink.textContent = label;
+  for (const node of [el.setup, el.reader, el.lib]) node.setAttribute('inert', '');
+  el.paywall.hidden = false; el.paywallLink.focus();
+}
+function withinGrace() {
+  const last = ls.get(K_VERIFIED);
+  return Number.isFinite(last) && last <= Date.now() && Date.now() - last < OFFLINE_GRACE;
+}
+async function verifyAccess() {
+  let r;
+  try { r = await fetch('/api/subscription/status', { credentials: 'same-origin', cache: 'no-store' }); }
+  catch (e) { if (!withinGrace()) lockApp('conexion'); return; }
+  if (r.status === 401) { lockApp('sesion'); return; }
+  if (r.status >= 500) { if (!withinGrace()) lockApp('conexion'); return; }   // fallo temporal del servidor
+  let st = null;
+  try { st = await r.json(); } catch (e) { /* respuesta que no es de Prompter */ }
+  if (r.ok && st && st.active === true) { ls.set(K_VERIFIED, Date.now()); return; }
+  try { localStorage.removeItem(K_VERIFIED); } catch (e) { /* almacenamiento bloqueado */ }
+  lockApp('suscripcion');
+}
+verifyAccess();
+setInterval(verifyAccess, RECHECK);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) verifyAccess(); });
+
 /* Inicio */
 renderSetup();
 renderStats();

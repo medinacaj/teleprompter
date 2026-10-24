@@ -1,0 +1,10 @@
+{
+  "name": "prompter",
+  "private": true,
+  "type": "module",
+  "description": "Prompter: teleprompter web con suscripción (Vercel + Supabase + PayPal).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node tests/smoke.cjs && node --test tests/*.test.mjs"
+  }
+}
