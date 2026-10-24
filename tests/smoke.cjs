@@ -95,3 +95,7 @@ console.log('OK: PWA cache rotation and same-origin GET-only caching');
 assert.match(html, /keys\.length - 100/);
 assert.match(html, /flex-wrap:wrap/);
 console.log('OK: bounded bookmarks and reader settings layout');
+
+assert.match(html, /if \(!persistLib\(\)\) \{\s*if \(previous\) Object\.assign\(it, previous\)/);
+assert.match(html, /S\.scripts = S\.scripts\.filter\(it => it !== copy\)/);
+console.log('OK: rollback when script persistence fails');
