@@ -325,6 +325,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       </div>
       <div class="row" style="padding-bottom:0;border-top:1px solid var(--line)">
         <button type="button" class="btn" id="btnRestart"><svg class="ic" aria-hidden="true"><use href="#i-replay"/></svg>Reiniciar lectura</button>
+        <button type="button" class="btn" id="btnFullscreen">Pantalla completa</button>
       </div>
     </div>
     <div class="controls">
@@ -377,7 +378,7 @@ const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
- 'popFsDown','popFsUp','btnRestart','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
+ 'popFsDown','popFsUp','btnRestart','btnFullscreen','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
 const NOTE = /\[[^\[\]\n]*\]/g;                  // [indicaciones]: se muestran, no se leen ni cuentan
@@ -892,6 +893,18 @@ el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePo
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
+el.btnFullscreen.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else if (el.reader.requestFullscreen) await el.reader.requestFullscreen();
+    else { flash('Pantalla completa no disponible en este navegador.'); return; }
+    closePop();
+  } catch (e) { flash('No se pudo activar pantalla completa.'); }
+});
+document.addEventListener('fullscreenchange', () => {
+  el.btnFullscreen.textContent = document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa';
+  if (S.view === 'reader') requestAnimationFrame(layout);
+});
 press(el.btnSlow, () => setWpm(S.prefs.wpm - WPM[2]));
 press(el.btnFast, () => setWpm(S.prefs.wpm + WPM[2]));
 el.btnPlay.addEventListener('click', toggle);
