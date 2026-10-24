@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v9/);
+assert.match(worker, /prompter-static-v10/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -177,7 +177,16 @@ console.log('OK: empty editor shows no redundant message; entered text retains w
 assert.match(html, /class="brand-icon" aria-hidden="true">🎬<\/span>/);
 assert.match(html, /class="brand-content"/);
 assert.match(html, /<details class="help-disclosure">/);
-assert.match(html, /<summary><span aria-hidden="true">⌨️<\/span> Ayuda y atajos<\/summary>/);
+assert.match(html, /<summary aria-label="Ayuda y atajos" title="Ayuda y atajos">/);
+assert.match(html, /<symbol id="i-help"/);
+const startHeader = html.indexOf('<header class="setup-header">');
+const endHeader = html.indexOf('</header>', startHeader);
+assert.ok(startHeader >= 0 && endHeader > startHeader, 'Header markup missing');
+assert.ok(html.slice(startHeader, endHeader).includes('class="help-disclosure"'), 'Help must be in the header');
+assert.match(html, /#setup \.help-disclosure \.tips\{[\s\S]*?position:absolute/);
+assert.match(html, /helpPanel\.open && !helpPanel\.contains\(e\.target\)/);
+assert.match(html, /helpPanel\.querySelector\('summary'\)\.focus\(\)/);
+assert.ok(html.indexOf('class="help-disclosure"', html.indexOf('<div class="actions">')) === -1, 'Do not add another help row below actions');
 assert.match(html, /class="tips" id="tips"/);
 assert.match(html, /#setup \.setup-settings \.card::before/);
 assert.match(html, /#setup \.actions \.btn\.primary\{box-shadow:/);
