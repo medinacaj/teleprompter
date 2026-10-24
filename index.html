@@ -340,6 +340,10 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 }
 
 
+/* Avisos breves durante la lectura (marcadores, pantalla completa). */
+.r-msg{position:absolute;left:50%;bottom:calc(100% + 10px);z-index:7;transform:translateX(-50%);max-width:calc(100vw - 28px);margin:0;padding:9px 16px;border:1px solid #46464d;border-radius:999px;background:rgba(29,29,31,.97);color:#f5f5f7;font-size:.82rem;line-height:1.35;text-align:center;pointer-events:none}
+.r-msg:empty{display:none}
+
 /* Identidad visual discreta: claqueta y pequeños acentos cálidos. */
 #setup .setup-header{display:flex;align-items:center;gap:15px;margin-bottom:23px}
 #setup .brand-icon{
@@ -533,6 +537,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
   </div>
 
   <div class="dock" id="dock">
+    <p class="r-msg" id="rMsg" role="status"></p>
     <div class="pop" id="pop" hidden>
       <div class="row">
         <span class="lbl">Tamaño de letra</span>
@@ -575,8 +580,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 (() => {
 'use strict';
 
-/* Fuente mono para las lecturas numéricas (IBM Plex Mono); si no carga, se usa la del sistema */
-try { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap'; document.head.appendChild(l); } catch (e) { /* sin fuente web */ }
+/* Sin fuentes externas: la app no envía solicitudes a terceros y funciona igual sin conexión. */
 const $ = (s, r = document) => r.querySelector(s);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
@@ -604,13 +608,13 @@ const S = {
   p: 0,            // progreso 0..1 de la lectura
   elapsed: 0       // cronómetro real (s), solo avanza leyendo
 };
-const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1, statsRecorded: false };
+const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1, statsRecorded: false, draftWarned: false };
 const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
 
 const el = {};
 ['setup','title','text','meta','readingStats','btnResetStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
- 'count','digit','ticks','dock','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
+ 'count','digit','ticks','dock','rMsg','pop','btnMore','btnExit','btnPlay','speedRange','speedValue','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','readerFont','lineDown','lineUp','lineVal','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
 /* Utilidades */
@@ -627,7 +631,12 @@ const maxScroll = () => Math.max(0, el.scroller.scrollHeight - el.scroller.clien
 const fmtDate = ms => { try { return new Date(ms).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
 const firstLine = t => (t.trim().split('\n')[0] || '').trim().slice(0, 60);
 let flashT = 0;
-function flash(msg) { el.flash.textContent = msg; clearTimeout(flashT); flashT = setTimeout(() => { el.flash.textContent = ''; }, 2400); }
+// En lectura la pantalla de configuración está oculta: el aviso se muestra sobre los controles.
+function flash(msg) {
+  const box = S.view === 'reader' ? el.rMsg : el.flash;
+  el.flash.textContent = ''; el.rMsg.textContent = ''; box.textContent = msg;
+  clearTimeout(flashT); flashT = setTimeout(() => { el.flash.textContent = ''; el.rMsg.textContent = ''; }, 2400);
+}
 
 /* Pulsar y mantener (repite al dejar presionado) */
 function press(btn, fn) {
@@ -668,7 +677,14 @@ let prefT = 0, draftT = 0;
 function savePrefs() { clearTimeout(prefT); prefT = setTimeout(flushPrefs, 250); }
 function flushPrefs() { clearTimeout(prefT); ls.set(K_PREFS, S.prefs); }
 function flushDraft() { clearTimeout(draftT); return ls.set(K_DRAFT, { t: S.title, x: S.text }); }
-function saveDraft() { clearTimeout(draftT); draftT = setTimeout(flushDraft, 400); }
+function saveDraft() {
+  clearTimeout(draftT);
+  draftT = setTimeout(() => {
+    const ok = flushDraft();
+    if (!ok && !R.draftWarned) flash('No se pudo guardar el borrador en este dispositivo. Copia o exporta tu guion.');
+    R.draftWarned = !ok;
+  }, 400);
+}
 function persistLib() { return ls.set(K_LIB, { scripts: S.scripts, dels: S.dels }); }
 function saveSession() {
   if (S.view !== 'reader') return;
@@ -772,7 +788,7 @@ async function syncCloud() {
     const remote = new Map();
     snap.docs.forEach(d => {
       const x = d.data();
-      if (x && typeof x.content === 'string') remote.set(d.id, { id: d.id, name: String(x.name || 'Guion'), content: x.content, savedAt: Number(x.savedAt) || 0, pending: false });
+      if (x && typeof x.content === 'string' && x.content.length <= MAX_SCRIPT_LENGTH) remote.set(d.id, { id: d.id, name: String(x.name || 'Guion').slice(0, 80), content: x.content, savedAt: Number(x.savedAt) || 0, pending: false });
     });
     const left = [];
     for (const id of S.dels) {
@@ -861,7 +877,7 @@ function loadScript(id) {
 }
 async function saveScript() {
   const text = S.text.trim(); if (!text) return;
-  if (S.text.length > 200000) { flash('El guion es demasiado largo para guardarlo.'); return; }
+  if (S.text.length > MAX_SCRIPT_LENGTH) { flash('El guion es demasiado largo para guardarlo.'); return; }
   const name = (S.title.trim() || firstLine(text) || 'Guion sin título').slice(0, 80);
   const now = Date.now();
   const existing = S.scripts.find(s => s.name === name);
@@ -966,6 +982,8 @@ function exportOne(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
   offerFile(safeName(it.name) + '.txt', it.content, 'text/plain');
 }
+/* Una fecha futura dejaría el guion fijo arriba e impediría actualizarlo al importar. */
+const validSavedAt = v => { const n = Number(v), now = Date.now(); return Number.isFinite(n) && n > 0 && n <= now ? n : now; };
 /* Convierte el archivo en [{name, content, savedAt}]; lanza Error con mensaje para el usuario */
 function parseImport(fileName, raw) {
   const txt = raw.replace(/^﻿/, '');
@@ -980,7 +998,7 @@ function parseImport(fileName, raw) {
   const arr = Array.isArray(data) ? data : (data && Array.isArray(data.scripts) ? data.scripts : null);
   if (!arr) throw new Error('El archivo no contiene guiones de Prompter.');
   return arr.slice(0, 500).filter(x => x && typeof x.content === 'string')
-    .map(x => ({ name: typeof x.name === 'string' ? x.name : '', content: x.content.replace(/\r\n?/g, '\n'), savedAt: Number(x.savedAt) || Date.now() }));
+    .map(x => ({ name: typeof x.name === 'string' ? x.name : '', content: x.content.replace(/\r\n?/g, '\n'), savedAt: validSavedAt(x.savedAt) }));
 }
 async function importFile(file) {
   if (!file) return;

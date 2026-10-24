@@ -87,7 +87,7 @@ assert.match(html, /function setReaderFont\(font\)/);
 assert.match(html, /--reader-font/);
 console.log('OK: persisted reader font selection');
 
-assert.match(worker, /prompter-static-v10/);
+assert.match(worker, /prompter-static-v11/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
 assert.match(worker, /request\.method !== 'GET'/);
 console.log('OK: PWA cache rotation and same-origin GET-only caching');
@@ -191,3 +191,14 @@ assert.match(html, /class="tips" id="tips"/);
 assert.match(html, /#setup \.setup-settings \.card::before/);
 assert.match(html, /#setup \.actions \.btn\.primary\{box-shadow:/);
 console.log('OK: refined header identity, compact accent and accessible optional shortcuts');
+
+assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html), 'Do not request third-party fonts');
+assert.match(html, /<p class="r-msg" id="rMsg" role="status"><\/p>/);
+assert.match(html, /const box = S\.view === 'reader' \? el\.rMsg : el\.flash/);
+assert.match(html, /const validSavedAt = v =>/);
+assert.match(html, /savedAt: validSavedAt\(x\.savedAt\)/);
+assert.match(html, /String\(x\.name \|\| 'Guion'\)\.slice\(0, 80\)/);
+assert.match(html, /No se pudo guardar el borrador/);
+assert.ok(!html.includes('S.text.length > 200000'), 'Use MAX_SCRIPT_LENGTH');
+assert.match(fs.readFileSync('sitemap.xml', 'utf8'), /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+console.log('OK: visible reader notices, no third-party fonts, bounded imports and draft warnings');

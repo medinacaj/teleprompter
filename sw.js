@@ -1,5 +1,5 @@
 /* Solo se almacenan archivos públicos de la aplicación, nunca guiones. */
-const CACHE = 'prompter-static-v10';
+const CACHE = 'prompter-static-v11';
 const ASSETS = ['./index.html', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
