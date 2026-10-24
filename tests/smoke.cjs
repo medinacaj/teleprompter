@@ -55,3 +55,10 @@ assert.match(html, /function recordReading\(completed\)/);
 assert.match(html, /K_STATS/);
 assert.match(html, /R\.statsRecorded = false/);
 console.log('OK: local reading statistics');
+
+for (const shortcut of ["e.key === 'ArrowLeft'", "e.key === 'ArrowRight'", "e.key === 'Home'", "e.key === 'End'"]) {
+  assert.ok(html.includes(shortcut), 'Missing keyboard shortcut ' + shortcut);
+}
+assert.match(html, /function seekReader\(progress\)/);
+assert.match(html, /document\.exitFullscreen\(\)\.catch/);
+console.log('OK: presenter shortcuts and fullscreen cleanup');
