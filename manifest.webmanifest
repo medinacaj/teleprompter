@@ -1,12 +1,12 @@
 {
   "name": "Prompter — Lector de guiones",
   "short_name": "Prompter",
-  "description": "Lector de guiones con velocidad ajustable y modo espejo.",
+  "description": "Teleprompter Studio: lectura inmersiva de guiones con ajustes de velocidad, modo espejo y biblioteca local.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a0b",
-  "theme_color": "#0a0a0b",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "lang": "es",
   "icons": [
     {
