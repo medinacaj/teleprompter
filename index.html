@@ -1025,7 +1025,9 @@ el.btnBookmarkSave.addEventListener('click', () => {
   closePop(); flash('Marcador guardado.');
 });
 el.btnBookmarkGo.addEventListener('click', () => {
-  const saved = ls.get(K_BOOKMARKS) || {}, progress = saved[bookmarkKey()];
+  const stored = ls.get(K_BOOKMARKS);
+  const saved = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+  const progress = saved[bookmarkKey()];
   if (!Number.isFinite(progress)) { closePop(); flash('Este guion no tiene marcador.'); return; }
   pause(); endCountdown(false);
   S.p = clamp(progress, 0, 1); S.finished = false;
