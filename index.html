@@ -580,8 +580,10 @@ async function saveScript() {
   else syncCloud();
 }
 async function deleteScript(id) {
+  const previous = S.scripts;
   S.scripts = S.scripts.filter(s => s.id !== id);
-  persistLib(); renderSetup(); renderLibrary();
+  if (!persistLib()) { S.scripts = previous; libMsg('No se pudo eliminar: almacenamiento no disponible.'); return; }
+  renderSetup(); renderLibrary();
   if (Cloud.synced) { try { await Cloud.coll.doc(id).delete(); return; } catch (e) { /* se reintenta luego */ } }
   if (Cloud.avail !== false && !S.dels.includes(id)) { S.dels.push(id); persistLib(); }
 }
@@ -668,7 +670,8 @@ async function importFile(file) {
     }
   }
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
-  persistLib(); renderSetup(); renderLibrary();
+  const stored = persistLib(); renderSetup(); renderLibrary();
+  if (!stored) { libMsg('No se pudo guardar la importación. Libera espacio o exporta una copia.'); return; }
   const parts = [];
   if (added) parts.push(added + (added === 1 ? ' nuevo' : ' nuevos'));
   if (updated) parts.push(updated + (updated === 1 ? ' actualizado' : ' actualizados'));
@@ -794,7 +797,9 @@ function frame(ts) {
   if (!S.playing) return;
   if (R.last == null) R.last = ts;
   let dt = (ts - R.last) / 1000; R.last = ts;
-  if (dt < 0) dt = 0; if (dt > 0.1) dt = 0.1;
+  if (!Number.isFinite(dt) || dt < 0) dt = 0;
+  // Evita saltos excesivos tras interrupciones, sin ralentizar la lectura a 10 fps.
+  if (dt > 0.25) dt = 0.25;
   const max = maxScroll();
   const st = el.scroller.scrollTop;
   if (max > 2 && Math.abs(st - R.lastSet) > 2) S.p = clamp(st / max, 0, 1);   // el usuario movió el texto
