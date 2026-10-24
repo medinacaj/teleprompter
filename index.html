@@ -366,22 +366,29 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
 #setup .step:hover{background:#2e2a22;border-color:rgba(251,191,36,.48);color:#fcd34d}
 #setup .actions .btn.primary{box-shadow:0 5px 18px rgba(245,158,11,.14)}
 #setup .actions .btn:not(.primary):hover:not(:disabled){border-color:rgba(251,191,36,.4)}
-#setup .help-disclosure{margin:12px 2px 0;color:#9696a3;font-size:.76rem}
+#setup .help-disclosure{
+  position:relative;z-index:8;flex:0 0 auto;margin-left:auto;align-self:center;
+}
 #setup .help-disclosure summary{
-  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
-  color:#b1b1bc;line-height:1.5;padding:6px 9px;
-  border:1px solid transparent;border-radius:10px;list-style:none;
-  transition:color .16s ease,background .16s ease;
+  display:grid;place-items:center;width:42px;height:42px;padding:0;
+  border:1px solid #35353b;border-radius:13px;background:#1b1c20;
+  color:#bfc0ca;cursor:pointer;list-style:none;
+  transition:color .16s ease,border-color .16s ease,background .16s ease;
 }
 #setup .help-disclosure summary::-webkit-details-marker{display:none}
-#setup .help-disclosure summary::after{
-  content:"⌄";font-size:.93rem;color:#fbbf24;margin-left:4px;
-  transition:transform .16s ease;
-}
-#setup .help-disclosure[open] summary::after{transform:rotate(180deg)}
-#setup .help-disclosure summary:hover{background:#1d1d22;color:#f5f5f7}
+#setup .help-disclosure summary::marker{content:""}
+#setup .help-disclosure summary .ic{width:20px;height:20px}
+#setup .help-disclosure summary:hover,
+#setup .help-disclosure[open] summary{color:#fbbf24;background:#24231e;border-color:rgba(251,191,36,.5)}
 #setup .help-disclosure summary:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
-#setup .help-disclosure .tips{margin:3px 8px 7px;max-width:65ch;color:#aaaab6;line-height:1.55}
+#setup .help-disclosure .tips{
+  position:absolute;top:calc(100% + 9px);right:0;
+  width:min(330px,calc(100vw - 38px));max-width:none;
+  margin:0;padding:15px 17px;
+  color:#d2d2dc;font-size:.81rem;line-height:1.58;
+  border:1px solid #414148;border-radius:15px;
+  background:#202125;box-shadow:0 14px 35px rgba(0,0,0,.42);
+}
 @media(max-width:560px){
   #setup .setup-header{gap:12px;margin-bottom:20px}
   #setup .brand-icon{width:47px;height:47px;border-radius:14px;font-size:1.5rem}
@@ -411,6 +418,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.9-2.5 2-2.5 4"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-mirror" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/></symbol>
   </defs>
 </svg>
@@ -425,6 +433,10 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
       <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
       <noscript><p class="sub">Activa JavaScript para utilizar el teleprompter.</p></noscript>
     </div>
+    <details class="help-disclosure">
+      <summary aria-label="Ayuda y atajos" title="Ayuda y atajos"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></summary>
+      <p class="tips" id="tips"></p>
+    </details>
   </header>
 
   <section class="setup-editor" aria-label="Editor de guion">
@@ -464,10 +476,7 @@ body{background:var(--bg);font-size:16px;line-height:1.5;letter-spacing:normal}
     <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
   </div>
   <p class="flash" id="flash" role="status"></p>
-  <details class="help-disclosure">
-    <summary><span aria-hidden="true">⌨️</span> Ayuda y atajos</summary>
-    <p class="tips" id="tips"></p>
-  </details>
+
   <div class="setup-stats">
     <p class="meta" id="readingStats" aria-live="polite"></p>
     <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
