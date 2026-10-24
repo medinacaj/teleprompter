@@ -232,6 +232,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
   <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
   <p class="meta" id="meta"></p>
+  <p class="meta" id="readingStats" aria-live="polite"></p>
 
   <section class="card" aria-label="Ajustes de lectura">
     <div class="row">
@@ -361,7 +362,7 @@ const WPM = [60, 300, 5];        // palabras por minuto: mín, máx, paso
 const LH = 1.5;                  // interlineado del texto
 const GUIDE = 0.36;              // posición de la línea guía (fracción de la altura)
 const MIN_DUR = 4;               // duración mínima de una lectura (s)
-const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session', K_BOOKMARKS = 'prompter:v2:bookmarks';
+const K_PREFS = 'prompter:v2:prefs', K_LIB = 'prompter:v2:library', K_DRAFT = 'prompter:v2:draft', K_SESSION = 'prompter:v2:session', K_BOOKMARKS = 'prompter:v2:bookmarks', K_STATS = 'prompter:v2:stats';
 
 /* Almacenamiento local (con try/catch: puede estar bloqueado) */
 const ls = {
@@ -379,11 +380,11 @@ const S = {
   p: 0,            // progreso 0..1 de la lectura
   elapsed: 0       // cronómetro real (s), solo avanza leyendo
 };
-const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1 };
+const R = { lines: [], spans: [], active: -1, guide: 0, lineH: 0, lastSet: 0, last: null, raf: 0, cd: 0, rz: 0, wake: null, swallow: 0, sy: 0, tA: '', tB: '', sessionTick: -1, statsRecorded: false };
 const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null };
 
 const el = {};
-['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
+['setup','title','text','meta','readingStats','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
  'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
@@ -880,7 +881,25 @@ function pause() {
   if (R.raf) { cancelAnimationFrame(R.raf); R.raf = 0; }
   updateStatus();
 }
-function finish() { pause(); S.finished = true; S.p = 1; clearSession(); updateStatus(); updateHud(); }
+/* Estadísticas locales, sin identificar usuarios ni enviar información al servidor. */
+function recordReading(completed) {
+  if (S.elapsed < 2 || R.statsRecorded) return;
+  R.statsRecorded = true;
+  const stats = ls.get(K_STATS) || { sessions: 0, completed: 0, seconds: 0 };
+  stats.sessions = Math.max(0, Number(stats.sessions) || 0) + 1;
+  stats.completed = Math.max(0, Number(stats.completed) || 0) + (completed ? 1 : 0);
+  stats.seconds = Math.max(0, Number(stats.seconds) || 0) + Math.round(S.elapsed);
+  if (ls.set(K_STATS, stats)) renderStats();
+}
+function renderStats() {
+  const st = ls.get(K_STATS);
+  el.readingStats.textContent = st && st.sessions ?
+    'Actividad en este dispositivo: ' + st.sessions + ' sesiones · ' + (st.completed || 0) + ' completas · ' + fmt(st.seconds || 0) + ' de lectura' : '';
+}
+function finish() {
+  pause(); S.finished = true; S.p = 1; clearSession();
+  recordReading(true); updateStatus(); updateHud();
+}
 function toggle() { if (S.counting) endCountdown(true); else if (S.playing) pause(); else play(); }
 function restart() {
   pause(); S.p = 0; S.elapsed = 0; S.finished = false;
@@ -910,7 +929,7 @@ function endCountdown(start) {
 function openReader() {
   if (!S.text.trim()) return;
   clearSession();
-  R.sy = window.scrollY;
+  R.sy = window.scrollY; R.statsRecorded = false;
   S.view = 'reader'; S.words = countWords(S.text);
   el.setup.hidden = true; el.reader.hidden = false;
   buildText();
@@ -922,6 +941,7 @@ function openReader() {
 }
 function closeReader() {
   pause(); endCountdown(false); closePop(); unlockScreen(); clearSession();
+  recordReading(false);
   S.view = 'setup'; el.reader.hidden = true; el.setup.hidden = false;
   renderSetup();
   requestAnimationFrame(() => window.scrollTo(0, R.sy));
@@ -1042,6 +1062,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 }
 /* Inicio */
 renderSetup();
+renderStats();
 renderLibrary();
 permState().then(st => {
   if (st === 'granted') syncCloud();
