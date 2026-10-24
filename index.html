@@ -273,6 +273,7 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <button type="button" class="ib" id="libClose" aria-label="Cerrar"><svg class="ic"><use href="#i-x"/></svg></button>
     </div>
     <input type="search" id="libSearch" class="field" placeholder="Buscar guiones…" aria-label="Buscar guiones" autocomplete="off">
+    <select id="libSort" class="field" aria-label="Ordenar guiones"><option value="recent">Más recientes</option><option value="oldest">Más antiguos</option><option value="name">Título A–Z</option></select>
     <div class="list" id="libList"></div>
     <div class="lib-actions">
       <button type="button" class="btn" id="btnExport" aria-label="Exportar todos los guiones (.json)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Exportar</button>
@@ -383,7 +384,7 @@ const Cloud = { avail: true, synced: false, syncing: false, coll: null, p: null 
 
 const el = {};
 ['setup','title','text','meta','flash','tips','fsVal','wpmVal','mirrorSw','btnSave','btnLib','libCount','btnStart',
- 'lib','libList','libSearch','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
+ 'lib','libList','libSearch','libSort','libClose','libNote','btnExport','btnImport','fileIn','libMsg','reader','rTime','rPpm','rWords','rStatus','rFill','stage','scroller','paper','rText',
  'count','digit','ticks','dock','pop','btnMore','btnExit','btnSlow','btnFast','btnPlay','icPlay','popFsVal','popMirror',
  'popFsDown','popFsUp','btnRestart','btnFullscreen','btnBookmarkSave','btnBookmarkGo','readerContrast','fsDown','fsUp','wpmDown','wpmUp'].forEach(id => { el[id] = document.getElementById(id); });
 
@@ -557,6 +558,9 @@ function renderLibrary() {
   }
   const term = el.libSearch.value.trim().toLocaleLowerCase('es');
   const matches = S.scripts.filter(it => !term || (it.name + ' ' + it.content).toLocaleLowerCase('es').includes(term));
+  if (el.libSort.value === 'name') matches.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  else if (el.libSort.value === 'oldest') matches.sort((a, b) => a.savedAt - b.savedAt);
+  else matches.sort((a, b) => b.savedAt - a.savedAt);
   if (S.scripts.length && !matches.length) {
     const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No hay guiones que coincidan con la búsqueda.'; list.appendChild(p);
   }
@@ -589,6 +593,7 @@ function renderLibrary() {
 }
 function openLib() { el.lib.hidden = false; el.libSearch.value = ''; libMsg(''); renderLibrary(); el.libSearch.focus(); syncCloud(); }
 el.libSearch.addEventListener('input', renderLibrary);
+el.libSort.addEventListener('change', renderLibrary);
 function closeLib() { el.lib.hidden = true; el.btnLib.focus(); }
 function loadScript(id) {
   const it = S.scripts.find(s => s.id === id); if (!it) return;
