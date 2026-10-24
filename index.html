@@ -575,7 +575,11 @@ function renderLibrary() {
     const dl = document.createElement('button'); dl.type = 'button'; dl.className = 'ib'; dl.setAttribute('aria-label', 'Descargar «' + it.name + '» como .txt');
     dl.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>';
     dl.addEventListener('click', () => exportOne(it.id));
-    row.append(open, dl, del);
+    const dup = document.createElement('button'); dup.type = 'button'; dup.className = 'ib';
+    dup.setAttribute('aria-label', 'Duplicar guion «' + it.name + '»');
+    dup.textContent = '⧉';
+    dup.addEventListener('click', () => duplicateScript(it.id));
+    row.append(open, dup, dl, del);
     list.appendChild(row);
   }
   el.btnExport.disabled = !S.scripts.length;
@@ -601,6 +605,26 @@ async function saveScript() {
   S.scripts.sort((a, b) => b.savedAt - a.savedAt);
   const stored = persistLib(); renderSetup(); flash(stored ? 'Guardado ✓' : 'No se pudo guardar en este dispositivo. Exporta una copia.');
   if (Cloud.synced) { try { await pushItem(it); } catch (e) { /* queda pendiente */ } }
+  else syncCloud();
+}
+async function duplicateScript(id) {
+  const original = S.scripts.find(it => it.id === id);
+  if (!original) return;
+  const base = original.name.slice(0, 65);
+  let name = (base + ' (copia)').slice(0, 80), n = 2;
+  while (S.scripts.some(it => it.name === name)) {
+    name = (base + ' (copia ' + n++ + ')').slice(0, 80);
+  }
+  const now = Date.now();
+  const copy = { id: 's' + now.toString(36) + Math.random().toString(36).slice(2, 6), name, content: original.content, savedAt: now, pending: true };
+  S.scripts.unshift(copy);
+  if (!persistLib()) {
+    S.scripts.shift();
+    libMsg('No se pudo duplicar: almacenamiento no disponible.');
+    return;
+  }
+  renderSetup(); renderLibrary(); libMsg('Guion duplicado.');
+  if (Cloud.synced) { try { await pushItem(copy); } catch (e) { /* pendiente */ } }
   else syncCloud();
 }
 async function deleteScript(id) {
