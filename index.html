@@ -5,7 +5,7 @@
 <title>Prompter — Lector de guiones para grabar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Teleprompter en el navegador: pega tu guion, fija la velocidad en palabras por minuto y lee con cuenta atrás, línea guía, modo espejo y guiones guardados.">
-<meta name="theme-color" content="#0a0a0b">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="robots" content="index, follow">
@@ -30,31 +30,15 @@
 :root{
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --serif:Georgia,'Noto Serif','Times New Roman',serif;
-  --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-  color-scheme:light;
-  --bg:#f5f2ea; --panel:#ffffff; --panel2:#efe9dc; --line:#ddd5c4;
-  --text:#1c1a16; --muted:#6a655a; --faint:#8a8476;
-  --amber:#b45309; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-  --teal:#0f766e; --danger:#b91c1c;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --bg:#000000; --panel:#1d1d1f; --panel2:#303033; --line:#3b3b40;
+  --text:#f5f5f7; --muted:#b7b7c1; --faint:#9898a3;
+  --amber:#2997ff; --btn:#0071e3; --btn-h:#1687fa; --on-btn:#ffffff;
+  --teal:#2997ff; --danger:#ff8589;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-    --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-    --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-    --teal:#2dd4bf; --danger:#f87171;
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100;
-  --teal:#2dd4bf; --danger:#f87171;
 }
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -129,9 +113,9 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 .reader{
   position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
   color-scheme:dark;
-  --bg:#0a0a0b; --panel:#151517; --panel2:#1e1e21; --line:#2b2b30;
-  --text:#f2f1ed; --muted:#9a9aa2; --faint:#74747c;
-  --amber:#fbbf24; --btn:#f59e0b; --btn-h:#fbbf24; --on-btn:#1c1100; --teal:#2dd4bf;
+  --bg:#000000; --panel:#1d1d1f; --panel2:#303033; --line:#3b3b40;
+  --text:#f5f5f7; --muted:#b7b7c1; --faint:#9898a3;
+  --amber:#2997ff; --btn:#0071e3; --btn-h:#1687fa; --on-btn:#ffffff; --teal:#2997ff;
   --fs:44px; --lh:66px; --guide:200px;
   background:var(--bg);color:var(--text);
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
@@ -197,6 +181,183 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
   .reader.playing .tally{animation:none}
   .w{transition:none}
 }
+
+/* ================= STUDIO EDITION / EDITORIAL DARK =================
+   Inspiración: teatro oscuro, tipografía limpia y un único acento azul.
+   Se reutilizan todos los IDs y eventos existentes del teleprompter. */
+body{font-size:17px;line-height:1.47;letter-spacing:-.013em;background:#000}
+:focus-visible{outline:2px solid #2997ff;outline-offset:3px}
+button,.btn,.ib,.step,.field,.switch{transition:background-color .2s ease,border-color .2s ease,color .2s ease,transform .16s ease}
+button:active:not(:disabled){transform:scale(.975)}
+.wrap{
+  max-width:1160px;
+  margin:0 auto;
+  padding:clamp(28px,5.5vw,70px) clamp(18px,3vw,34px) 56px;
+  display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.82fr);
+  column-gap:22px;row-gap:22px;
+}
+.studio-hero{grid-column:1/-1;padding:8px 0 clamp(25px,3.4vw,42px);max-width:900px}
+.tag{font-family:var(--sans);font-size:.69rem;letter-spacing:.17em;font-weight:600;color:#b2b2bd;gap:12px}
+.dot{width:7px;height:7px;background:#2997ff;box-shadow:none}
+.tag-divider{width:1px;height:13px;background:#4c4c50}
+.studio-hero h1{
+  max-width:980px;margin:30px 0 18px;
+  font-family:var(--sans);font-size:clamp(3.15rem,6.2vw,5.75rem);
+  line-height:1.035;letter-spacing:-.058em;font-weight:600;color:#f5f5f7;
+}
+.headline-muted{display:block;color:#86868b}
+.studio-hero .sub{max-width:570px;margin:0;color:#b7b7c1;font-size:clamp(1.04rem,1.6vw,1.3rem);line-height:1.55;letter-spacing:-.025em}
+.hero-details{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.hero-details span{display:inline-flex;padding:8px 13px;border:1px solid #333337;border-radius:999px;color:#b9b9c3;font-size:.74rem;letter-spacing:.012em}
+.editor-panel,.settings-panel,.launch-panel{
+  min-width:0;background:#1d1d1f;border:1px solid #2d2d32;border-radius:28px;
+  padding:clamp(20px,2.4vw,30px);
+}
+.editor-panel{grid-column:1;grid-row:2}
+.settings-panel{grid-column:2;grid-row:2;align-self:stretch;display:flex;flex-direction:column}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:28px}
+.section-index{font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.115em;color:#7fbfff}
+.section-head h2,.launch-copy h2{font-size:clamp(1.4rem,2.2vw,1.75rem);line-height:1.2;letter-spacing:-.035em;font-weight:600;margin:8px 0 0;color:#f5f5f7}
+.section-aside{font-size:.71rem;color:#9c9ca6;text-align:right;white-space:nowrap}
+.input-label{display:block;color:#cbcad3;font-size:.81rem;font-weight:500;margin:18px 1px 9px}
+.input-label:first-of-type{margin-top:0}
+.field{
+  background:#111113;border:1px solid #424247;color:#f5f5f7;border-radius:17px;
+  padding:15px 17px;font-size:1rem;min-height:51px;line-height:1.5;
+  -webkit-appearance:none;appearance:none;
+}
+.field::placeholder{color:#92929e}
+.field:focus{outline:2px solid rgba(41,151,255,.45);outline-offset:1px;border-color:#2997ff}
+textarea.field{min-height:330px;margin-top:0;border-radius:21px;line-height:1.65;resize:vertical}
+.editor-panel .meta{margin:11px 2px 0;font-size:.76rem;color:#a0a0ab;min-height:18px}
+.settings-panel .card{background:none;border:0;border-radius:0;padding:0;flex:1}
+.settings-panel .row{padding:22px 0;min-height:96px;align-items:center;gap:10px}
+.settings-panel .row:first-child{padding-top:7px}
+.settings-panel .row+.row{border-top:1px solid #35353a}
+.lbl{font-size:.97rem;font-weight:500;letter-spacing:-.02em}
+.hint{font-size:.76rem;line-height:1.48;color:#a0a0ad;max-width:31ch}
+.stepper{gap:7px}
+.step{width:41px;height:41px;border-radius:50%;background:#303035;border:1px solid #414147;color:#f5f5f7}
+.step:hover{background:#414148;border-color:#6a6a74}
+.val{font-size:.91rem;color:#f5f5f7;min-width:3.4ch}
+.switch{width:53px;height:31px;border:1px solid #484850;border-radius:999px;background:#303035}
+.switch::after{width:23px;height:23px;border-radius:50%;background:#a9a9b4}
+.switch[aria-checked="true"]{background:#0071e3;border-color:#0071e3}
+.switch[aria-checked="true"]::after{background:#fff;transform:translateX(21px)}
+.settings-note{border-top:1px solid #35353a;padding-top:17px;color:#9898a3;font-size:.77rem;line-height:1.5;margin:auto 0 0}
+.launch-panel{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:12px 28px;background:#121214;border-color:#2a2a30;padding:25px 30px}
+.launch-copy{flex:1 1 270px}
+.launch-copy h2{font-size:1.45rem}
+.launch-copy p{color:#aaaab6;font-size:.85rem;margin:7px 0 0;line-height:1.45;max-width:40ch}
+.actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:1 1 430px;margin:0}
+.btn{
+  min-height:46px;padding:10px 19px;gap:9px;
+  font-size:.88rem;line-height:1.3;font-weight:500;letter-spacing:-.015em;
+  border:1px solid #424247;border-radius:999px;background:#2b2b2e;color:#f5f5f7;
+}
+.btn:hover:not(:disabled){background:#38383c;border-color:#777780}
+.btn.primary{flex:0 1 auto;background:#0071e3;border-color:#0071e3;color:white;font-weight:600;padding-inline:23px;white-space:nowrap}
+.btn.primary:hover:not(:disabled){background:#1687fa;border-color:#1687fa}
+.btn .ic{width:19px;height:19px}
+.launch-panel .flash,.launch-panel .tips{flex:1 1 100%;margin:0;min-height:0}
+.launch-panel .flash:empty,.launch-panel .tips:empty{display:none}
+.flash{color:#93c9ff}
+.tips{color:#a3a3ae}
+.session-panel{grid-column:1/-1;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;color:#9898a3}
+.session-panel .meta{margin:0;font-size:.76rem}
+.session-panel .btn{min-height:33px;padding:7px 14px;background:transparent;font-size:.72rem}
+.modal{background:rgba(0,0,0,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.panel{max-width:700px;max-height:min(86dvh,840px);background:#1d1d1f;border:1px solid #44444a;border-radius:28px;padding-bottom:0;overflow:hidden}
+.panel-head{padding:17px 20px 12px 26px;border-bottom:1px solid #37373e}
+.panel-head h2{font-size:1.45rem;font-weight:600;letter-spacing:-.04em}
+.panel #libSearch,.panel #libSort{width:calc(100% - 40px);margin:14px 20px 0;min-height:47px;border-radius:999px;background:#101012}
+.panel #libSort{margin-top:9px;cursor:pointer}
+.panel .list{padding:18px 20px;gap:9px;align-content:start}
+.item{background:#29292c;border:1px solid #3a3a40;border-radius:19px;padding:8px 9px 8px 18px;min-height:70px}
+.item .open{padding:8px 4px}
+.item .name{color:#f5f5f7;font-size:.91rem;line-height:1.3}
+.item .info{color:#a0a0ac;margin-top:4px}
+.del{border-radius:13px;color:#b4b4bf}
+.del:hover{background:#353539}
+.lib-actions{padding:13px 20px;border-top:1px solid #37373e;gap:10px}
+.lib-actions .btn{background:#303035;min-height:45px}
+.lib-msg{color:#93c9ff}
+.note{border-color:#37373e;color:#a5a5b0}
+.reader{--bg:#000;--panel:#1d1d1f;--panel2:#303033;--line:#3b3b40;--text:#f5f5f7;--muted:#b7b7c1;--faint:#9898a3;--amber:#2997ff;--btn:#0071e3;--btn-h:#1687fa;--on-btn:#fff;--teal:#2997ff}
+.hud{
+  margin:0;gap:8px 15px;
+  padding:17px clamp(16px,3vw,36px) 12px;font-size:.7rem;letter-spacing:.01em;
+  background:rgba(29,29,31,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.status{letter-spacing:.075em}
+.tally{background:#777785}
+.reader.playing .tally{background:#2997ff}
+.bar{margin:0;background:#25252b;height:3px;border-radius:0}
+.bar i{background:#2997ff}
+.paper{max-width:950px;padding-left:clamp(19px,5vw,60px);padding-right:clamp(19px,5vw,60px)}
+.text{letter-spacing:-.016em}
+.w{opacity:.85}
+.w.past{opacity:.35}
+.w.cur{color:#f5f5f7}
+.w.cue.cur,.nt{color:#73b8ff}
+.reader.high-contrast .w.cur{color:#fff;text-decoration:underline;text-decoration-color:#2997ff}
+.band{background:rgba(41,151,255,.055);border-top:1px solid rgba(41,151,255,.32);border-bottom:1px solid rgba(41,151,255,.32)}
+.band::before{border-left-color:#2997ff}
+.band::after{border-right-color:#2997ff}
+.fade.top{background:linear-gradient(#000,transparent)}
+.fade.bot{background:linear-gradient(transparent,#000)}
+.count .ticks line,.count .cross{stroke:#333338}
+.count .ring{stroke:#2997ff}
+.count .digit{font-family:var(--sans);font-weight:600;letter-spacing:-.07em}
+.dock{padding:10px 14px 15px;background:transparent}
+.controls{max-width:535px;border-radius:999px;background:rgba(51,51,54,.9);border:1px solid #45454b;padding:7px 10px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ib{border-radius:50%;color:#c0c0ca}
+.ib:hover{color:#fff;background:#414147}
+.play{background:#0071e3;color:#fff;width:61px;height:61px}
+.play:hover{background:#1687fa;color:#fff}
+.pop{width:min(350px,calc(100vw - 28px));right:14px;bottom:calc(100% + 10px);max-height:min(70dvh,590px);overflow-y:auto;background:rgba(29,29,31,.97);border:1px solid #46464d;border-radius:25px;padding:7px 19px;box-shadow:none;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.pop .row{padding:14px 0}
+.pop .btn{border-radius:16px}
+.pop .field{border-radius:14px;max-width:170px}
+@media(max-width:860px){
+  .wrap{grid-template-columns:minmax(0,1fr);max-width:700px}
+  .studio-hero{grid-column:1;padding-bottom:18px}
+  .editor-panel,.settings-panel,.launch-panel,.session-panel{grid-column:1;grid-row:auto}
+  .settings-panel .row{min-height:auto}
+  .settings-panel .settings-note{margin-top:14px}
+  .launch-panel{padding:24px}
+  .actions{justify-content:flex-start}
+}
+@media(max-width:560px){
+  .wrap{padding:27px 15px 40px;gap:15px}
+  .studio-hero{padding:4px 5px 17px}
+  .studio-hero h1{font-size:clamp(2.85rem,12vw,4rem);margin:25px 0 16px;letter-spacing:-.052em}
+  .studio-hero .sub{font-size:1.02rem}
+  .hero-details{gap:7px;margin-top:21px}
+  .hero-details span{font-size:.66rem;padding:7px 10px}
+  .editor-panel,.settings-panel{padding:22px 19px;border-radius:24px}
+  .section-head{margin-bottom:20px}
+  .section-aside{display:none}
+  textarea.field{min-height:250px}
+  .settings-panel .row{padding:18px 0}
+  .settings-panel .hint{max-width:25ch}
+  .launch-panel{display:block;border-radius:24px;padding:23px 19px}
+  .launch-copy{margin-bottom:22px}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .actions .btn{min-width:0;padding-inline:10px;font-size:.82rem}
+  .actions .btn.primary{grid-column:1/-1;grid-row:1;min-height:53px;font-size:.95rem}
+  .panel{max-height:91dvh;border-radius:25px 25px 0 0;border-bottom:0}
+  .panel-head h2{font-size:1.3rem}
+  .reader .hud{padding:11px 14px 10px;font-size:.64rem;gap:5px 10px}
+  .reader .hud .status{margin-left:auto}
+  .dock{padding:6px 10px 10px}
+  .controls{padding:5px 8px}
+  .play{height:57px;width:57px}
+}
+@media(prefers-reduced-motion:reduce){
+  button,.btn,.ib,.step,.field,.switch{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -222,20 +383,31 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
 
 <!-- ============ CONFIGURACIÓN ============ -->
 <main id="setup" class="wrap">
-  <header>
-    <div class="tag"><span class="dot"></span>Prompter</div>
-    <h1>Lector de guiones</h1>
-    <p class="sub">Pega tu guion, ajusta la velocidad y lee mientras grabas.</p>
-    <noscript><p class="sub">Prompter es un teleprompter web: pega tu guion, fija la velocidad en palabras por minuto (ppm) y léelo frente a la cámara con cuenta atrás, línea guía y modo espejo. Necesita JavaScript activado para funcionar.</p></noscript>
+  <header class="studio-hero">
+    <div class="tag"><span class="dot" aria-hidden="true"></span> PROMPTER <span class="tag-divider" aria-hidden="true"></span> STUDIO EDITION</div>
+    <h1>Tu guion.<span class="headline-muted"> A tu ritmo.</span></h1>
+    <p class="sub">Prepara el texto, ajusta tu lectura y concéntrate en lo que quieres comunicar.</p>
+    <div class="hero-details" aria-label="Características"><span>Lectura inmersiva</span><span>Ajustes precisos</span><span>Guardado local</span></div>
+    <noscript><p class="sub">Prompter necesita JavaScript activado para leer guiones y administrar la biblioteca.</p></noscript>
   </header>
 
-  <input id="title" class="field" type="text" maxlength="80" placeholder="Título del guion (opcional)" aria-label="Título del guion" autocomplete="off">
-  <textarea id="text" class="field" rows="10" placeholder="Pega aquí tu guion…" aria-label="Texto del guion"></textarea>
-  <p class="meta" id="meta"></p>
-  <p class="meta" id="readingStats" aria-live="polite"></p>
-  <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
+  <section class="editor-panel" aria-labelledby="editorHeading">
+    <div class="section-head">
+      <div><span class="section-index">01 / EDITOR</span><h2 id="editorHeading">Prepara tu guion</h2></div>
+      <span class="section-aside">Tu espacio de escritura</span>
+    </div>
+    <label class="input-label" for="title">Título</label>
+    <input id="title" class="field" type="text" maxlength="80" placeholder="Ponle un nombre a tu guion…" aria-label="Título del guion" autocomplete="off">
+    <label class="input-label" for="text">Contenido</label>
+    <textarea id="text" class="field" rows="10" placeholder="Escribe o pega aquí tu guion…" aria-label="Texto del guion"></textarea>
+    <p class="meta" id="meta"></p>
+  </section>
 
-  <section class="card" aria-label="Ajustes de lectura">
+  <section class="settings-panel" aria-labelledby="settingsHeading">
+    <div class="section-head">
+      <div><span class="section-index">02 / PERSONALIZACIÓN</span><h2 id="settingsHeading">Ajusta la lectura</h2></div>
+    </div>
+    <section class="card" aria-label="Ajustes de lectura">
     <div class="row">
       <div><span class="lbl">Tamaño de letra</span><span class="hint">Tamaño del texto durante la lectura</span></div>
       <div class="stepper">
@@ -256,15 +428,24 @@ textarea.field{min-height:230px;resize:vertical;line-height:1.55;margin-top:12px
       <div><span class="lbl" id="mirLbl">Modo espejo</span><span class="hint">Invierte el texto para teleprompters con vidrio. Si lees directo de la pantalla, déjalo apagado.</span></div>
       <button type="button" class="switch" id="mirrorSw" role="switch" aria-checked="false" aria-labelledby="mirLbl"></button>
     </div>
+    </section>
+    <p class="settings-note">Los cambios se aplican al momento de comenzar la lectura.</p>
   </section>
 
-  <div class="actions">
-    <button type="button" class="btn" id="btnSave"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg>Guardar</button>
-    <button type="button" class="btn" id="btnLib"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span>Mis guiones<span id="libCount"></span></span></button>
-    <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
-  </div>
-  <p class="flash" id="flash" role="status"></p>
-  <p class="tips" id="tips"></p>
+  <section class="launch-panel" aria-labelledby="launchHeading">
+    <div class="launch-copy"><span class="section-index">03 / ACCIÓN</span><h2 id="launchHeading">Todo listo para empezar.</h2><p>Cuando quieras, entra al lector. Tu texto ocupará el centro de la pantalla.</p></div>
+    <div class="actions">
+      <button type="button" class="btn" id="btnSave"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg>Guardar</button>
+      <button type="button" class="btn" id="btnLib"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span>Mis guiones<span id="libCount"></span></span></button>
+      <button type="button" class="btn primary" id="btnStart"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Comenzar lectura</button>
+    </div>
+    <p class="flash" id="flash" role="status"></p>
+    <p class="tips" id="tips"></p>
+  </section>
+  <section class="session-panel" aria-label="Estadísticas locales">
+    <p class="meta" id="readingStats" aria-live="polite"></p>
+    <button type="button" class="btn" id="btnResetStats" hidden>Reiniciar estadísticas</button>
+  </section>
 </main>
 
 <!-- ============ BIBLIOTECA ============ -->
