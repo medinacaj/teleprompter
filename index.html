@@ -986,7 +986,7 @@ press(el.lineUp, () => setLineSpacing(S.prefs.lineSpacing + 0.1));
 setLineSpacing(S.prefs.lineSpacing);
 const readerFonts = { serif: 'var(--serif)', sans: 'var(--sans)', mono: 'var(--mono)' };
 function setReaderFont(font) {
-  if (!Object.hasOwn(readerFonts, font)) return;
+  if (!Object.prototype.hasOwnProperty.call(readerFonts, font)) return;
   S.prefs.font = font;
   el.readerFont.value = font;
   el.reader.style.setProperty('--reader-font', readerFonts[font]);
