@@ -902,8 +902,11 @@ el.scroller.addEventListener('scroll', () => {
 document.addEventListener('keydown', e => {
   if (S.view === 'setup') { if (e.key === 'Escape' && !el.lib.hidden) closeLib(); return; }
   if (e.key === 'Escape') { if (!el.pop.hidden) closePop(); else closeReader(); return; }
-  const onBtn = e.target && e.target.closest && e.target.closest('button');
-  if ((e.code === 'Space' || e.key === ' ' || e.key === 'Enter') && !onBtn) { e.preventDefault(); toggle(); }
+  // No interceptar teclas al escribir ni al usar controles interactivos.
+  const target = e.target;
+  if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing ||
+      (target && target.closest && target.closest('input, textarea, select, button, a, [contenteditable=""], [contenteditable="true"], [role="textbox"]'))) return;
+  if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); setWpm(S.prefs.wpm + WPM[2]); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); setWpm(S.prefs.wpm - WPM[2]); }
 });
