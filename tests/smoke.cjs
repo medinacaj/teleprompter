@@ -21,3 +21,14 @@ for (const id of ['setup','reader','scroller','rText','btnPlay','btnStart','btnS
 assert.match(html, /visibilitychange/);
 assert.match(html, /flushDraft\(\)/);
 console.log('OK: HTML structure, JavaScript syntax, schema and essential controls');
+
+const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+assert.equal(manifest.display, 'standalone');
+assert.ok(manifest.icons.length);
+for (const icon of manifest.icons) assert.ok(fs.existsSync(icon.src.replace(/^\.\//, '')));
+const worker = fs.readFileSync('sw.js', 'utf8');
+new vm.Script(worker, { filename: 'sw.js' });
+assert.match(html, /serviceWorker\.register/);
+assert.match(html, /id="libSearch"/);
+assert.match(html, /K_SESSION/);
+console.log('OK: PWA, offline worker, library search and session recovery');
