@@ -929,7 +929,13 @@ el.btnMore.addEventListener('click', () => { el.pop.hidden ? openPop() : closePo
 press(el.popFsDown, () => setFs(S.prefs.fs - FS[2]));
 press(el.popFsUp, () => setFs(S.prefs.fs + FS[2]));
 el.btnRestart.addEventListener('click', () => { closePop(); restart(); });
-const bookmarkKey = () => S.title + '\\n' + S.text;
+/* Huella compacta: evita guardar el texto completo como clave en localStorage. */
+const bookmarkKey = () => {
+  const input = S.title + '\\n' + S.text;
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) { h ^= input.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(36) + ':' + input.length;
+};
 el.btnBookmarkSave.addEventListener('click', () => {
   const key = bookmarkKey(), saved = ls.get(K_BOOKMARKS) || {};
   saved[key] = clamp(S.p, 0, 1);
