@@ -125,3 +125,9 @@ assert.match(html, /el\.setup\.setAttribute\('inert', ''\)/);
 assert.match(html, /el\.setup\.removeAttribute\('inert'\)/);
 assert.match(html, /el\.lib\.addEventListener\('keydown', e => \{/);
 console.log('OK: library dialog focus trap and inert background');
+
+assert.match(html, /const previousDels = S\.dels/);
+assert.match(html, /S\.dels = Cloud\.avail !== false && !S\.dels\.includes\(id\)/);
+assert.match(html, /S\.scripts = previous; S\.dels = previousDels/);
+assert.match(html, /S\.dels = S\.dels\.filter\(x => x !== id\)/);
+console.log('OK: cloud deletion tombstones are persisted atomically');
