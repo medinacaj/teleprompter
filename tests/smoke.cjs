@@ -62,3 +62,17 @@ for (const shortcut of ["e.key === 'ArrowLeft'", "e.key === 'ArrowRight'", "e.ke
 assert.match(html, /function seekReader\(progress\)/);
 assert.match(html, /document\.exitFullscreen\(\)\.catch/);
 console.log('OK: presenter shortcuts and fullscreen cleanup');
+
+const elementIds = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
+const seen = new Set();
+for (const id of elementIds) {
+  assert.ok(!seen.has(id), 'Duplicate HTML id: ' + id);
+  seen.add(id);
+}
+const idsList = html.match(/\['setup','title'[\s\S]*?\]\.forEach\(id =>/);
+assert.ok(idsList, 'Missing DOM element registry');
+for (const match of idsList[0].matchAll(/'([^']+)'/g)) {
+  assert.ok(seen.has(match[1]), 'Registry references missing HTML element: ' + match[1]);
+}
+assert.match(html, /id="btnResetStats"/);
+console.log('OK: unique DOM ids, complete element registry and statistics reset');
